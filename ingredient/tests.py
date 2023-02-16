@@ -10,14 +10,14 @@ class TestOwnIngredientsModel(TestCase):
         self.ingredient = OwnIngredients.objects.create(
             type = 'food',
             name = 'rice',
-            amount = 0.6,
+            quantity = 0.6,
             unit = 'pound',
             expiration_date = '2025-06-01'
         )
 
     def test_owningredientsmodel(self):
         ingredient = OwnIngredients.objects.get(id = self.ingredient.id)
-        self.assertEqual(ingredient.amount, 0.6)
+        self.assertEqual(ingredient.quantity, 0.6)
         ingredient = OwnIngredients.objects.get(id = self.ingredient.id)
         self.assertEqual(ingredient.type,'food')
         ingredient = OwnIngredients.objects.get(id = self.ingredient.id)
@@ -33,7 +33,7 @@ class TestOwnIngredientsSerializers(TestCase):
         self.ingredient = OwnIngredients.objects.create(
             type = 'food',
             name = 'rice',
-            amount = 0.6,
+            quantity = 0.6,
             unit = 'pound',
             expiration_date = '2025-06-01'
         )
@@ -42,12 +42,12 @@ class TestOwnIngredientsSerializers(TestCase):
 
     def test_serializer_contains_expected_fields(self):
         data = self.serializer.data
-        self.assertCountEqual(data.keys(),['type','name','amount','unit','expiration_date'])
+        self.assertCountEqual(data.keys(),['type','name','quantity','unit','expiration_date'])
 
     def test_serializer_data_matches_instance_values(self):
         data = self.serializer.data
         self.assertEqual(data['type'], self.ingredient.type)
         self.assertEqual(data['name'], self.ingredient.name)
-        self.assertEqual(data['amount'], self.ingredient.amount)
+        self.assertEqual(data['quantity'], self.ingredient.quantity)
         self.assertEqual(data['unit'], self.ingredient.unit)
         self.assertEqual(data['expiration_date'], str(self.ingredient.expiration_date))

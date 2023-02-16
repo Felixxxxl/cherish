@@ -12,7 +12,7 @@ class OwnIngredients(models.Model):
     ]
     type = models.CharField(max_length=64)
     name = models.CharField(max_length=64)
-    amount = models.FloatField()
+    quantity = models.FloatField()
     unit = models.CharField(max_length=12, choices=unit_choices) 
     expiration_date = models.DateField()
     
