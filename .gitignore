@@ -1,0 +1,17 @@
+cherish/__pycache__/urls.cpython-39.pyc
+cherish/__pycache__/wsgi.cpython-39.pyc
+cherish/__pycache__/urls.cpython-39.pyc
+ingredient/migrations/__pycache__/0001_initial.cpython-39.pyc
+ingredient/migrations/__pycache__/0002_owningredientcategory_parent.cpython-39.pyc
+ingredient/migrations/0001_initial.py
+ingredient/migrations/0002_alter_owningredients_table.py
+ingredient/migrations/0002_owningredientcategory_parent.py
+ingredient/migrations/0003_alter_owningredients_amount.py
+ingredient/migrations/0004_alter_owningredients_amount.py
+ingredient/migrations/__pycache__/0001_initial.cpython-39.pyc
+ingredient/migrations/0001_initial.py
+ingredient/migrations/0002_alter_owningredients_table.py
+ingredient/migrations/0003_alter_owningredients_amount.py
+ingredient/migrations/0004_alter_owningredients_amount.py
+ingredient/migrations/__pycache__/0001_initial.cpython-39.pyc
+db.sqlite3
