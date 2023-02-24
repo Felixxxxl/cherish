@@ -1,0 +1,39 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Load the Bootstrap CSS -->
+  <link href='{% static "css/bootstrap.css" %}' rel="stylesheet">
+  <!-- Load jQuery -->
+  <script src="{% static 'js/jquery-3.6.3.js' %}"></script>
+  <!-- Load Bootstrap JavaScript -->
+  <script src='{% static "js/bootstrap.js" %}'></script>
+  {% block title %}
+  {% endblock %}
+</head>
+
+<body>
+
+  <header>
+    <!-- Include navigation.html -->
+    {% include "navigation.html" %}
+  </header>
+
+  <main class="container">
+
+    <div class="row mt-3">
+      <div class="col-12">
+        <!-- this block can be replaced with main content here -->
+        {% block content %}{% endblock %}
+      </div>
+    </div>
+
+  </main>
+  <!-- include footer.html -->
+  {% include "footer.html" %}
+</body>
+
+</html>
