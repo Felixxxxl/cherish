@@ -1,25 +1,20 @@
 from django.db import models
 
-# Create your models here.
+class OwnIngredient(models.Model):
 
-class OwnIngredients(models.Model):
+    ingredient_id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=64, unique=True)
 
-    unit_choices = [
-        ('kilogram', 'Kilogram'),
-        ('gram', 'Gram'),
-        ('ounce', 'Ounce'),
-        ('pound', 'Pound')
-    ]
-    type = models.CharField(max_length=64)
-    name = models.CharField(max_length=64)
-    quantity = models.FloatField()
-    unit = models.CharField(max_length=12, choices=unit_choices) 
-    expiration_date = models.DateField()
+    def __str__(self):
+        return self.name
+
+class OwnIngredientDetail(models.Model):
     
-    class Meta:
-        db_table = 'own_ingredients_info'
-        verbose_name = "own_ingredients"
-        verbose_name_plural = verbose_name
+    detail_id = models.AutoField(primary_key=True)
+    ingredient = models.ForeignKey(OwnIngredient, on_delete=models.CASCADE, related_name="details")
+    quantity = models.FloatField()
+    quantity_unit = models.CharField(max_length=16)
+    expiry_date = models.DateField()
 
     def __str__(self):
         return self.name
