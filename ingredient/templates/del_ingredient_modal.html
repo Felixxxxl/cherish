@@ -1,0 +1,71 @@
+<!-- Modal -->
+<div class="modal fade" id="DelModal" tabindex="-1" aria-labelledby="DelModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title" id="DelIngredient">Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+
+            <div class="modal-body">
+                <label>Deatil Id:<input type="text" class="form-control" id="detail-id" disabled
+                        readonly></input></label>
+                <p>Are you sure to delete?</p>
+            </div>
+
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-primary" id="deleteForm">Delete</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+    $(document).ready(function () {
+
+        var DelModal = document.getElementById("DelModal")
+
+        DelModal.addEventListener('show.bs.modal', function (event) {
+
+            var button = event.relatedTarget
+
+            var detail_id = button.getAttribute('data-id')
+
+            DelModal.querySelector('#detail-id').value = detail_id
+
+        });
+
+
+        $('#deleteForm').click(function () {
+
+            var EditModal = document.getElementById("DelModal")
+
+            var detail_id = EditModal.querySelector('#detail-id').value
+
+            $.ajax({
+                url: '/api/oi/detail/' + detail_id,
+                type: 'DELETE',
+                data: {
+                    detail_id: detail_id
+                },
+                success: function (response) {
+                    console.log(response.status)
+                    $("#success-modal").modal("show")
+                    setTimeout(function () {
+                        location.reload()
+                    }, 300);
+                }
+            });
+
+
+        })
+    })
+</script>

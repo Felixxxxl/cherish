@@ -1,0 +1,143 @@
+<!-- <script src="/static/js/bootstrap.bundle.js"></script> -->
+<link href="/static/bootstrap-table/themes/bootstrap-table/bootstrap-table.css" rel="stylesheet">
+<link rel="stylesheet" href="/static/css/bootstrap-icons.css">
+<script src="/static/bootstrap-table/bootstrap-table.js"></script>
+<script src="/static/bootstrap-table/themes/bootstrap-table/bootstrap-table.js"></script>
+<link href="/static/css/bootstrap.css" rel="stylesheet">
+
+{% include "add_ingredient_modal.html" %}
+{% include "edit_ingredient_modal.html" %}
+{% include "del_ingredient_modal.html" %}
+{% include "status_modal.html" %}
+
+<div class="container">
+    
+    
+    <div class="row">
+        <div class="col mb-1 ">
+            <button type="button" class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#AddModal"><i class="bi bi-plus-square"></i></button>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col">
+            <table id="IngredientsTable"></table>
+        </div>
+    </div>
+
+    
+</div>
+
+
+<script>
+    $(document).ready(function () {
+
+        $('#IngredientsTable').bootstrapTable('destroy').bootstrapTable({
+            url: '/api/oi/getcategorylist/',
+            method: 'get',
+            detailView: true,
+            uniqueId: "ingredient_id",
+            detailViewIcon: true,
+            cache: false, 
+            classes: "table table-borderless",
+            headerStyle:{classes:"table-dark"},
+            rowStyle:{classes:"table-primary"},
+            columns: [
+                {
+                    field: "ingredient_id",
+                    title: "Ingredient Id",
+                    align: "center",
+                    valign: "middle",
+                },
+                {
+                    field: 'name',
+                    title: 'Name',
+                    align: "center",
+                }
+                ,
+                {
+                    field: 'quantity_and_unit.total_quantity',
+                    title: 'Total Quantity',
+                    align: 'center',
+                    valign: 'middle'
+                },
+                {
+                    field: 'quantity_and_unit.total_quantity_unit',
+                    title: 'Unit',
+                    align: 'center',
+                    valign: 'middle'
+                },
+                {
+                    field: 'nearst_expiry_date',
+                    title: 'Nearst Expiry Date',
+                    align: 'center',
+                    valign: 'middle'
+                }
+            ],
+            onExpandRow: function (index, row, $detail) {
+                InitSubTable(index, row, $detail);
+            }
+        });
+
+
+        function InitSubTable(index, row, $detail) {
+
+            var cur_table = $detail.html('<table></table>').find('table');
+
+            $(cur_table).bootstrapTable({
+                url: '/api/oi/getdetailslist/' + row.ingredient_id ,
+                method:'get',
+                uniqueId: "detail_id", 
+                classes: "table table-hover table-borderless",
+                headerStyle:{classes:"table-info"},
+                columns: [
+                        {
+                            field: "detail_id",
+                            title: "Detail Id",
+                            align: "center", 
+                            valign: "middle",
+                        }
+                        ,
+                        {
+                            field: 'quantity',
+                            title: 'Quantity',
+                            align: 'center',
+                            valign: 'middle'
+                        },
+                        {
+                            field: 'quantity_unit',
+                            title: 'Unit',
+                            align: 'center',
+                            valign: 'middle'
+                        },
+                        {
+                            field: 'expiry_date',
+                            title: 'Expiry Date',
+                            align: 'center',
+                            valign: 'middle'
+                        },
+                        {
+                            field: 'operate',
+                            title: 'Operate',
+                            align:'center',
+                            valign:'middle',
+                            formatter: operateFormatter
+                        }
+                    ],
+                
+            })
+
+        }
+
+        function operateFormatter(value,row,index){
+            return [
+            '<button type="button" class="btn primary" data-id="',row.detail_id,'"data-bs-toggle="modal" data-bs-target="#EditModal">','<i class="bi bi-pencil"></i>','</button>',
+            '<button type="button" class="btn primary" data-id="',row.detail_id,'"data-bs-toggle="modal" data-bs-target="#DelModal">','<i class="bi bi-trash3"></i>','</button>'
+            ].join('')
+        }
+
+
+
+
+    })
+</script>

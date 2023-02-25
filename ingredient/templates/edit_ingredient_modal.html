@@ -1,0 +1,108 @@
+<script src="/static/js/bootstrap.js"></script>
+<link href="/static/css/bootstrap.css" rel="stylesheet">
+<!-- Modal -->
+<div class="modal fade" id="EditModal" tabindex="-1" aria-labelledby="EditModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title" id="EditIngredient">Edit</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+
+            <div class="modal-body">
+                <form method="post" id="edit-form">
+
+                    <label for="detail-id" class="col-form-label">Detail Id:</label>
+                    <input type="text" class="form-control" id="detail-id" disabled readonly>
+
+                    <label for="ingredient-id" class="col-form-label">Ingredient Id:</label>
+                    <input type="text" class="form-control" id="ingredient-id" disabled readonly>
+
+                    <label for="detail-quantity" class="col-form-label">Quantity:</label>
+                    <div class="input-group">
+
+                        <input type="number" class="form-control" id="detail-quantity">
+
+                        <select class="form-select" id="detail-quantity-unit">
+                            <option selected>Choose...</option>
+                            <option value="g">g</option>
+                            <option value="kg">kg</option>
+                            <option value="oz">oz</option>
+                            <option value="lbs">lbs</option>
+                        </select>
+                    </div>
+
+                    <label for="detail-expiry-date" class="col-form-label">Expiry Date:</label>
+                    <input type="date" class="form-control" id="detail-expiry-date">
+                </form>
+            </div>
+
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-outline-dark" id="updateForm">Modify</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+
+        var EditModal = document.getElementById("EditModal")
+
+        EditModal.addEventListener('show.bs.modal', function (event) {
+            var button = event.relatedTarget
+            var detail_id = button.getAttribute('data-id')
+            $.ajax({
+                url: '/api/oi/detail/' + detail_id,
+                type: 'get',
+                success: function (data) {
+                    EditModal.querySelector('#ingredient-id').value = data.ingredient.ingredient_id
+                    EditModal.querySelector('#detail-id').value = data.detail_id
+                    EditModal.querySelector('#detail-quantity').value = data.quantity
+                    EditModal.querySelector('#detail-quantity-unit').value = data.quantity_unit
+                    EditModal.querySelector('#detail-expiry-date').value = data.expiry_date
+                }
+            })
+        })
+
+    })
+
+
+    $('#updateForm').click(function () {
+
+        var EditModal = document.getElementById("EditModal")
+
+        ingredient_id = EditModal.querySelector('#ingredient-id').value
+        detail_id = EditModal.querySelector('#detail-id').value
+        quantity = EditModal.querySelector('#detail-quantity').value
+        quantity_unit = EditModal.querySelector('#detail-quantity-unit').value
+        expiry_date = EditModal.querySelector('#detail-expiry-date').value
+
+        $.ajax({
+            url: '/api/oi/detail/' + detail_id,
+            type: 'PUT',
+            data: {
+                ingredient_id: ingredient_id,
+                detail_id: detail_id,
+                quantity: quantity,
+                quantity_unit: quantity_unit,
+                expiry_date: expiry_date
+            },
+            success: function (response) {
+                console.log(response.status)
+                $("#success-modal").modal("show")
+                setTimeout(function () {
+                    location.reload()
+                }, 300)
+            }
+        });
+
+
+    })
+</script>
