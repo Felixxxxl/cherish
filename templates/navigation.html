@@ -17,11 +17,11 @@
         </li>
 
         <li class="nav-item">
-          <a class="nav-link {% if request.path == '/ingredients/' %}active{% endif %}" href="{% url 'ingredients' %}">INGREDIENTS</a>
+          <a class="nav-link {% if request.path == '/ingredient/' %}active{% endif %}" href="{% url 'ingredient' %}">INGREDIENTS</a>
         </li>
 
         <li class="nav-item">
-          <a class="nav-link" href="#">RECIPES</a>
+          <a class="nav-link {% if request.path == '/recipe/' %}active{% endif %}" href="{% url 'recipe' %}" href="#">RECIPES</a>
         </li>
 
       </ul>

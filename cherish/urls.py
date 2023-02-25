@@ -24,7 +24,8 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path('home/',homeView.homePage,name='home'),
     path('', RedirectView.as_view(url='home/',permanent = True)),
-    path('ingredients/',ingredientView.ingredientsPage,name='ingredients'),
+    path('ingredient/',ingredientView.ingredientsPage,name='ingredient'),
+    path('recipe/',recipeView.recipePage,name='recipe'),
 
     path('api/oi/getcategorylist/',ingredientView.OwnIngredientCategoryView.as_view()),
     path('api/oi/getdetailslist/<ingredient_id>',ingredientView.OwnIngredientDetailsListView.as_view()),
