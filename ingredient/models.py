@@ -6,7 +6,7 @@ class OwnIngredient(models.Model):
     name = models.CharField(max_length=64, unique=True)
 
     def __str__(self):
-        return self.ingredient_id
+        return 'OwnIngredient'
 
 class OwnIngredientDetail(models.Model):
     
@@ -17,5 +17,5 @@ class OwnIngredientDetail(models.Model):
     expiry_date = models.DateField()
 
     def __str__(self):
-        return self.detail_id
+        return 'OwnIngredientDetail'
     
