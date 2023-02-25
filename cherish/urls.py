@@ -14,21 +14,21 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path
 from django.views.generic import RedirectView
-from ingredient import views
-# from ingredient.views import IngredientViewSet, IngredientDetailViewSet, ingredient_tree
+from ingredient import views as ingredientView
+from home import views as homeView
+from recipe import views as recipeView
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-
-    path('home/',views.homePage,name='home'),
+    path('home/',homeView.homePage,name='home'),
     path('', RedirectView.as_view(url='home/',permanent = True)),
-    path('ingredients/',views.ingredientsPage,name='ingredients'),
+    path('ingredients/',ingredientView.ingredientsPage,name='ingredients'),
 
+    path('api/oi/getcategorylist/',ingredientView.OwnIngredientCategoryView.as_view()),
+    path('api/oi/getdetailslist/<ingredient_id>',ingredientView.OwnIngredientDetailsListView.as_view()),
+    path('api/oi/detail/<detail_id>',ingredientView.OwnIngredientDetailView.as_view()),
+    path('api/oi/detail/',ingredientView.OwnIngredientDetailView.as_view()),
 
-    path('api/oi/getcategorylist/',views.OwnIngredientCategoryView.as_view()),
-    path('api/oi/getdetailslist/<ingredient_id>',views.OwnIngredientDetailsListView.as_view()),
-    path('api/oi/detail/<detail_id>',views.OwnIngredientDetailView.as_view()),
-    path('api/oi/detail/',views.OwnIngredientDetailView.as_view()),
 ]

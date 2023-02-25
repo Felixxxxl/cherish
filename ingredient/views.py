@@ -93,9 +93,6 @@ class OwnIngredientDetailView(APIView):
             return Response(status=status.HTTP_202_ACCEPTED)
         except OwnIngredientDetail.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
-        
-def homePage(request):
-    return render(request,'home.html')
 
 def ingredientsPage(request):
     return render(request,'ingredients.html')

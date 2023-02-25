@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "ingredient.apps.IngredientConfig",
     "recipe.apps.RecipeConfig",
+    "home.apps.HomeConfig",
 ]
 
 MIDDLEWARE = [
