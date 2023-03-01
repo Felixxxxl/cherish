@@ -100,8 +100,8 @@
     var ingredient_col_id = 1
     $(document).ready(function () {
 
-        var clearInputGroup = function () {
-            var group = document.getElementById('ingredients-input-group');
+        var clearInputGroup = function (modal) {
+            var group = modal.querySelector('#ingredients-input-group');
             while (group.childElementCount > 1) {
                 group.removeChild(group.lastChild);
             }
@@ -110,7 +110,7 @@
         var EditModal = document.getElementById('EditModal')
 
         EditModal.addEventListener('show.bs.modal', function (event) {
-            clearInputGroup()
+            clearInputGroup(EditModal)
             var button = event.relatedTarget
             var recipe_id = button.getAttribute('data-id')
 
@@ -136,7 +136,7 @@
         })
 
         EditModal.addEventListener('hide.bs.modal', function (event) {
-            clearInputGroup()
+            clearInputGroup(EditModal)
 
         })
 
