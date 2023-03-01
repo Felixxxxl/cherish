@@ -1,5 +1,3 @@
-<script src="/static/js/bootstrap.js"></script>
-<link href="/static/css/bootstrap.css" rel="stylesheet">
 <!-- Modal -->
 <div class="modal fade" id="EditModal" tabindex="-1" aria-labelledby="EditModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl">
@@ -97,15 +95,8 @@
 </div>
 
 <script>
-    var ingredient_col_id = 1
+    var edit_ingredient_col_id = 1
     $(document).ready(function () {
-
-        var clearInputGroup = function (modal) {
-            var group = modal.querySelector('#ingredients-input-group');
-            while (group.childElementCount > 1) {
-                group.removeChild(group.lastChild);
-            }
-        }
 
         var EditModal = document.getElementById('EditModal')
 
@@ -123,13 +114,13 @@
                 success: function (data) {
                     EditModal.querySelector('#recipe-id').value = data.recipe_id
                     EditModal.querySelector('#recipe-name').value = data.recipe_name
-                    ingredient_col_id = 1
+                    edit_ingredient_col_id = 1
                     for (var i = 0; i < data.details.length; i++) {
-                        addIngredientInput(ingredient_col_id, data.details[i].detail_id)
-                        EditModal.querySelector('#ingredient-name-' + ingredient_col_id).value = data.details[i].ingredient.name
-                        EditModal.querySelector('#ingredient-quantity-' + ingredient_col_id).value = data.details[i].quantity
-                        EditModal.querySelector('#ingredient-unit-' + ingredient_col_id).value = data.details[i].unit
-                        ingredient_col_id += 1
+                        addIngredientInput(edit_ingredient_col_id, data.details[i].detail_id, modal = EditModal)
+                        EditModal.querySelector('#ingredient-name-' + edit_ingredient_col_id).value = data.details[i].ingredient.name
+                        EditModal.querySelector('#ingredient-quantity-' + edit_ingredient_col_id).value = data.details[i].quantity
+                        EditModal.querySelector('#ingredient-unit-' + edit_ingredient_col_id).value = data.details[i].unit
+                        edit_ingredient_col_id += 1
                     }
                 }
             })
@@ -140,85 +131,100 @@
 
         })
 
-        var AddBtn = document.getElementById('addBtn')
+        var AddBtn = EditModal.querySelector('#addBtn')
+
         AddBtn.addEventListener('click', function () {
-            addIngredientInput(ingredient_col_id)
-            ingredient_col_id += 1
+            addIngredientInput(edit_ingredient_col_id, "newRow" ,EditModal)
+            edit_ingredient_col_id += 1
+        })
+
+        function clearInputGroup(modal) {
+            var group = modal.querySelector('#ingredients-input-group');
+            while (group.childElementCount > 1) {
+                group.removeChild(group.lastChild);
+            }
+            edit_ingredient_col_id = 1
+        }
+
+        function deldetailBtn(obj) {
+            detail_id_str = obj.getAttribute('id')
+            detail_id_list = detail_id_str.split('-')
+            detail_id = detail_id_list[detail_id_list.length - 1]
+            input_id = 'ingredient-input-' + detail_id
+            document.getElementById(input_id).remove()
+        }
+
+
+        function addIngredientInput(edit_ingredient_col_id, detail_id = "newRow", modal) {
+
+            var detail_element = document.createElement('div')
+            detail_element.className = "row text-center"
+            detail_element.id = `ingredient-input-${edit_ingredient_col_id}`
+            detail_element.innerHTML = `<div class="col"><input type="text" id="detail-input-${edit_ingredient_col_id}" value=${detail_id} hidden><input type="text" class="form-control" id="ingredient-name-${edit_ingredient_col_id}"></div><div class="col"><input type="text" class="form-control" id="ingredient-quantity-${edit_ingredient_col_id}"></div><div class="col"><select  class="form-select" id="ingredient-unit-${edit_ingredient_col_id}"><option selected value="g">g</option><option value="kg">kg</option><option value="oz">oz</option><option value="lbs">lbs</option></select></div><div class="col"><button type="button" class="btn" id="ingredient-btn-${edit_ingredient_col_id}" onClick="deldetailBtn(this)"><i class="bi bi-x-circle"></i></button></div>`
+            modal.querySelector('#ingredients-input-group').appendChild(detail_element)
+        }
+
+        function inputpack(num, modal) {
+
+            var inputForm = document.getElementById('edit-form')
+            var recipe_id = inputForm.querySelector('#recipe-id')
+            var recipe_name = inputForm.querySelector('#recipe-name')
+            var details = []
+            for (let i = 1; i < num; i++) {
+                var detail = {}
+                try {
+                    var detail_id = inputForm.querySelector('#detail-input-' + i).value
+                }
+                catch {
+                    continue;
+                }
+                var detail_name = inputForm.querySelector('#ingredient-name-' + i).value
+                var detail_quantity = inputForm.querySelector('#ingredient-quantity-' + i).value
+                var detail_unit = inputForm.querySelector('#ingredient-unit-' + i).value
+                detail = {
+                    'detail_id': detail_id,
+                    'quantity': detail_quantity,
+                    'unit': detail_unit,
+                    'ingredient':
+                    {
+                        'name': detail_name
+                    }
+                }
+                details.push(detail)
+
+            }
+            return details
+        }
+
+        $('#updateForm').click(function () {
+            var inputForm = document.getElementById('edit-form')
+            var recipe_id = inputForm.querySelector('#recipe-id').value
+            data = inputpack(edit_ingredient_col_id)
+
+            $.ajax({
+                url: '/test/post/',
+                type: 'PUT',
+                data: JSON.stringify({
+                    'recipe_id': recipe_id,
+                    'details': data
+                }),
+                contentType: "application/json",
+                dataType: 'json',
+                success: function (response) {
+                    console.log(response)
+                    $("#success-modal").modal("show")
+                    setTimeout(function () {
+                        location.reload()
+                    }, 300)
+                }
+            });
+
+
         })
 
     })
 
-    function deldetailBtn(obj){
-        detail_id_str = obj.getAttribute('id')
-        detail_id_list = detail_id_str.split('-')
-        detail_id = detail_id_list[detail_id_list.length-1]
-        input_id = 'ingredient-input-'+detail_id
-        document.getElementById(input_id).remove()
-    }
 
-
-    function addIngredientInput(ingredient_col_id, detail_id = "newRow") {
-
-        var html_str = `<div class="row text-center" id="ingredient-input-${ingredient_col_id}" ><div class="col"><input type="text" id="detail-input-${ingredient_col_id}" value=${detail_id} hidden><input type="text" class="form-control" id="ingredient-name-${ingredient_col_id}"></div><div class="col"><input type="text" class="form-control" id="ingredient-quantity-${ingredient_col_id}"></div><div class="col"><select  class="form-select" id="ingredient-unit-${ingredient_col_id}"><option selected value="g">g</option><option value="kg">kg</option><option value="oz">oz</option><option value="lbs">lbs</option></select></div><div class="col"><button type="button" class="btn" id="ingredient-btn-${ingredient_col_id}" onClick="deldetailBtn(this)"><i class="bi bi-x-circle"></i></button></div></div>`
-        $('#ingredients-input-group').append(html_str)
-    }
-
-    function inputpack(num) {
-        var inputForm = document.getElementById('edit-form')
-        var recipe_id = inputForm.querySelector('#recipe-id')
-        var recipe_name = inputForm.querySelector('#recipe-name')
-        var details = []
-        for (let i = 1; i < num; i++) {
-            var detail = {}
-            try{
-                var detail_id = inputForm.querySelector('#detail-input-' + i).value
-            }
-            catch{
-                continue;
-            }
-            var detail_name = inputForm.querySelector('#ingredient-name-' + i).value
-            var detail_quantity = inputForm.querySelector('#ingredient-quantity-' + i).value
-            var detail_unit = inputForm.querySelector('#ingredient-unit-' + i).value
-            detail = {
-                'detail_id': detail_id,
-                'quantity': detail_quantity,
-                'unit': detail_unit,
-                'ingredient': 
-                {
-                    'name': detail_name
-                }
-            }
-            details.push(detail)
-            
-        }
-        return details
-    }
-
-    $('#updateForm').click(function () {
-        var inputForm = document.getElementById('edit-form')
-        var recipe_id = inputForm.querySelector('#recipe-id').value
-        data = inputpack(ingredient_col_id)
-
-        $.ajax({
-            url: '/test/post/',
-            type: 'PUT',
-            data: JSON.stringify({
-                'recipe_id': recipe_id,
-                'details': data
-            }),
-            contentType:"application/json",
-            dataType:'json',
-            success: function (response) {
-                console.log(response)
-                $("#success-modal").modal("show")
-                setTimeout(function () {
-                    location.reload()
-                }, 300)
-            }
-        });
-
-
-    })
 
 
 </script>
