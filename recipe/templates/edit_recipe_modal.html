@@ -1,0 +1,224 @@
+<script src="/static/js/bootstrap.js"></script>
+<link href="/static/css/bootstrap.css" rel="stylesheet">
+<!-- Modal -->
+<div class="modal fade" id="EditModal" tabindex="-1" aria-labelledby="EditModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl">
+
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title" id="EditRecipe">Edit</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+
+            <div class="modal-body">
+                <div class="'container-fluid">
+                    <form method="post" id="edit-form">
+                        <div class="row">
+                            <div class="col">
+                                <label for="recipe-id" class="col-form-label"><b>Recipe Id:</b></label>
+                                <input type="text" class="form-control" id="recipe-id" disabled readonly>
+                            </div>
+                            <div class="col">
+                                <label for="recipe-name" class="col-form-label"><b>Recipe Name:</b></label>
+                                <input type="text" class="form-control" id="recipe-name">
+                            </div>
+                        </div>
+
+                        <!-- <div class="row">
+                            <div class="col">
+                                <label for="recipe-describe" class="col-form-label"><b>Recipe Describe:</b></label>
+                                <textarea type="text" class="form-control" id="recipe-describe"></textarea>
+                            </div>
+                        </div>
+
+                        <label for="recipe-picture" class="col-form-label"><b>Recipe Picture:</b></label>
+                        <input class="form-control" type="file" id="recipe-picture-file"> -->
+
+                        <label for="recipe-ingredients" class="col-form-label"><b>Recipe Details:</b></label>
+
+                        <div id="ingredients-input-group">
+                            <div class="row text-center">
+                                <div class="col">
+                                    <label>Name</label>
+                                </div>
+                                <div class="col">
+                                    <label>Quantity</label>
+                                </div>
+                                <div class="col">
+                                    <label>Unit</label>
+                                </div>
+                                <div class="col">
+                                    <label>Operate</label>
+                                </div>
+                            </div>
+
+                            <!-- <div class="row text-center" id="ingredients-input-head">
+
+                                <div class="col"><input type="text" class="form-control"></div>
+
+                                <div class="col"><input type="text" class="form-control"></div>
+
+                                <div class="col">
+                                    <select class="form-select">
+                                        <option selected value="g">g</option>
+                                        <option value="kg">kg</option>
+                                        <option value="oz">oz</option>
+                                        <option value="lbs">lbs</option>
+                                    </select>
+                                </div>
+
+                                <div class="col"><button type="button" class="btn"><i
+                                            class="bi bi-x-circle"></i></button></div>
+                            </div> -->
+
+
+
+                        </div>
+
+
+                        <div class="row mt-5">
+                            <button type="button" class="btn btn-outline-primary" id="addBtn">Add Ingredient</button>
+                        </div>
+                    </form>
+                </div>
+
+            </div>
+
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-outline-dark" id="updateForm">Modify</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    var ingredient_col_id = 1
+    $(document).ready(function () {
+
+        var clearInputGroup = function () {
+            var group = document.getElementById('ingredients-input-group');
+            while (group.childElementCount > 1) {
+                group.removeChild(group.lastChild);
+            }
+        }
+
+        var EditModal = document.getElementById('EditModal')
+
+        EditModal.addEventListener('show.bs.modal', function (event) {
+            clearInputGroup()
+            var button = event.relatedTarget
+            var recipe_id = button.getAttribute('data-id')
+
+
+            $.ajax({
+                async: false,
+                url: '/api/recipe/getrecipeinfo/' + recipe_id,
+                type: 'get',
+                async: false,
+                success: function (data) {
+                    EditModal.querySelector('#recipe-id').value = data.recipe_id
+                    EditModal.querySelector('#recipe-name').value = data.recipe_name
+                    ingredient_col_id = 1
+                    for (var i = 0; i < data.details.length; i++) {
+                        addIngredientInput(ingredient_col_id, data.details[i].detail_id)
+                        EditModal.querySelector('#ingredient-name-' + ingredient_col_id).value = data.details[i].ingredient.name
+                        EditModal.querySelector('#ingredient-quantity-' + ingredient_col_id).value = data.details[i].quantity
+                        EditModal.querySelector('#ingredient-unit-' + ingredient_col_id).value = data.details[i].unit
+                        ingredient_col_id += 1
+                    }
+                }
+            })
+        })
+
+        EditModal.addEventListener('hide.bs.modal', function (event) {
+            clearInputGroup()
+
+        })
+
+        var AddBtn = document.getElementById('addBtn')
+        AddBtn.addEventListener('click', function () {
+            addIngredientInput(ingredient_col_id)
+            ingredient_col_id += 1
+        })
+
+    })
+
+    function deldetailBtn(obj){
+        detail_id_str = obj.getAttribute('id')
+        detail_id_list = detail_id_str.split('-')
+        detail_id = detail_id_list[detail_id_list.length-1]
+        input_id = 'ingredient-input-'+detail_id
+        document.getElementById(input_id).remove()
+    }
+
+
+    function addIngredientInput(ingredient_col_id, detail_id = "newRow") {
+
+        var html_str = `<div class="row text-center" id="ingredient-input-${ingredient_col_id}" ><div class="col"><input type="text" id="detail-input-${ingredient_col_id}" value=${detail_id} hidden><input type="text" class="form-control" id="ingredient-name-${ingredient_col_id}"></div><div class="col"><input type="text" class="form-control" id="ingredient-quantity-${ingredient_col_id}"></div><div class="col"><select  class="form-select" id="ingredient-unit-${ingredient_col_id}"><option selected value="g">g</option><option value="kg">kg</option><option value="oz">oz</option><option value="lbs">lbs</option></select></div><div class="col"><button type="button" class="btn" id="ingredient-btn-${ingredient_col_id}" onClick="deldetailBtn(this)"><i class="bi bi-x-circle"></i></button></div></div>`
+        $('#ingredients-input-group').append(html_str)
+    }
+
+    function inputpack(num) {
+        var inputForm = document.getElementById('edit-form')
+        var recipe_id = inputForm.querySelector('#recipe-id')
+        var recipe_name = inputForm.querySelector('#recipe-name')
+        var details = []
+        for (let i = 1; i < num; i++) {
+            var detail = {}
+            try{
+                var detail_id = inputForm.querySelector('#detail-input-' + i).value
+            }
+            catch{
+                continue;
+            }
+            var detail_name = inputForm.querySelector('#ingredient-name-' + i).value
+            var detail_quantity = inputForm.querySelector('#ingredient-quantity-' + i).value
+            var detail_unit = inputForm.querySelector('#ingredient-unit-' + i).value
+            detail = {
+                'detail_id': detail_id,
+                'quantity': detail_quantity,
+                'unit': detail_unit,
+                'ingredient': 
+                {
+                    'name': detail_name
+                }
+            }
+            details.push(detail)
+            
+        }
+        return details
+    }
+
+    $('#updateForm').click(function () {
+        var inputForm = document.getElementById('edit-form')
+        var recipe_id = inputForm.querySelector('#recipe-id').value
+        data = inputpack(ingredient_col_id)
+
+        $.ajax({
+            url: '/test/post/',
+            type: 'PUT',
+            data: JSON.stringify({
+                'recipe_id': recipe_id,
+                'details': data
+            }),
+            contentType:"application/json",
+            dataType:'json',
+            success: function (response) {
+                console.log(response)
+                $("#success-modal").modal("show")
+                setTimeout(function () {
+                    location.reload()
+                }, 300)
+            }
+        });
+
+
+    })
+
+
+</script>

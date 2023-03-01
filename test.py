@@ -30,3 +30,5 @@ rd3 = RecipeDetail(recipe = r, ingredient = ri3,quantity = 160,unit = 'g')
 rd1.save()
 rd2.save()
 rd3.save()
+
+

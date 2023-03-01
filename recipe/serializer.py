@@ -22,8 +22,17 @@ class RecipeDetailSerializer(serializers.Serializer):
     detail_id = serializers.IntegerField()
     quantity = serializers.FloatField()
     unit = serializers.CharField()
-    recipe = RecipeSerializer()
-    ingredient = IngredientSerializers()
+    recipe = RecipeSerializer(required=False)
+    ingredient = IngredientSerializers(required=False)
+
+    def update(self,instance,validated_data):
+        instance.quantity = validated_data.get('quantity')
+        instance.unit = validated_data.get('unit')
+        ingredient_id = validated_data.get('ingredient').get('ingredient_id')
+        ingredient = RecipeIngredient.objects.get(ingredient_id=ingredient_id)
+        instance.ingredient = ingredient
+        instance.save()
+        return instance
 
     class Meta:
         model = RecipeDetail
