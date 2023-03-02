@@ -52,24 +52,7 @@
                                 </div>
                             </div>
 
-                            <!-- <div class="row text-center" id="ingredients-input-head">
 
-                                <div class="col"><input type="text" class="form-control"></div>
-
-                                <div class="col"><input type="text" class="form-control"></div>
-
-                                <div class="col">
-                                    <select class="form-select">
-                                        <option selected value="g">g</option>
-                                        <option value="kg">kg</option>
-                                        <option value="oz">oz</option>
-                                        <option value="lbs">lbs</option>
-                                    </select>
-                                </div>
-
-                                <div class="col"><button type="button" class="btn"><i
-                                            class="bi bi-x-circle"></i></button></div>
-                            </div> -->
 
 
 
@@ -116,7 +99,7 @@
                     EditModal.querySelector('#recipe-name').value = data.recipe_name
                     edit_ingredient_col_id = 1
                     for (var i = 0; i < data.details.length; i++) {
-                        addIngredientInput(edit_ingredient_col_id, data.details[i].detail_id, modal = EditModal)
+                        editModaladdInputs(edit_ingredient_col_id, data.details[i].detail_id, modal = EditModal)
                         EditModal.querySelector('#ingredient-name-' + edit_ingredient_col_id).value = data.details[i].ingredient.name
                         EditModal.querySelector('#ingredient-quantity-' + edit_ingredient_col_id).value = data.details[i].quantity
                         EditModal.querySelector('#ingredient-unit-' + edit_ingredient_col_id).value = data.details[i].unit
@@ -134,7 +117,7 @@
         var AddBtn = EditModal.querySelector('#addBtn')
 
         AddBtn.addEventListener('click', function () {
-            addIngredientInput(edit_ingredient_col_id, "newRow" ,EditModal)
+            editModaladdInputs(edit_ingredient_col_id, "newRow", EditModal)
             edit_ingredient_col_id += 1
         })
 
@@ -146,16 +129,10 @@
             edit_ingredient_col_id = 1
         }
 
-        function deldetailBtn(obj) {
-            detail_id_str = obj.getAttribute('id')
-            detail_id_list = detail_id_str.split('-')
-            detail_id = detail_id_list[detail_id_list.length - 1]
-            input_id = 'ingredient-input-' + detail_id
-            document.getElementById(input_id).remove()
-        }
+        
 
 
-        function addIngredientInput(edit_ingredient_col_id, detail_id = "newRow", modal) {
+        function editModaladdInputs(edit_ingredient_col_id, detail_id = "newRow", modal) {
 
             var detail_element = document.createElement('div')
             detail_element.className = "row text-center"
@@ -164,7 +141,7 @@
             modal.querySelector('#ingredients-input-group').appendChild(detail_element)
         }
 
-        function inputpack(num, modal) {
+        function inputpack(num) {
 
             var inputForm = document.getElementById('edit-form')
             var recipe_id = inputForm.querySelector('#recipe-id')
@@ -202,7 +179,7 @@
             data = inputpack(edit_ingredient_col_id)
 
             $.ajax({
-                url: '/test/post/',
+                url: '/api/recipe/recipedetails/',
                 type: 'PUT',
                 data: JSON.stringify({
                     'recipe_id': recipe_id,
@@ -223,6 +200,14 @@
         })
 
     })
+
+    var deldetailBtn = function (obj) {
+            detail_id_str = obj.getAttribute('id')
+            detail_id_list = detail_id_str.split('-')
+            detail_id = detail_id_list[detail_id_list.length - 1]
+            input_id = '#ingredient-input-' + detail_id
+            EditModal.querySelector(input_id).remove()
+        }
 
 
 

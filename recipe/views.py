@@ -53,9 +53,39 @@ class RecipeInfoView(APIView):
             return Response(status.HTTP_404_NOT_FOUND)
         json = RecipeDetailsListSerializer(recipe)
         return Response(json.data)
+    
+    def delete(self,request,*args, **kwargs):
+        recipe_id = kwargs.get("recipe_id")
+        try:
+            recipe = Recipe.objects.get(recipe_id = recipe_id)  
+        except Recipe.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        details =RecipeDetail.objects.filter(recipe=recipe)
+        details.delete()
+        recipe.delete()
+        return Response(data={"success":True})
+    
+    def use(self,request,*args, **kwargs):
+
+
+        return Response(status=status.HTTP_200_OK)
 
 
 class RecipeDetailsListView(APIView):
+    def check(self,request,*args, **kwargs):
+        recipe_id = kwargs.get('recipe_id')
+        try:
+            recipe = Recipe.objects.get(recipe_id=recipe_id)
+            details = RecipeDetail.objects.filter(recipe=recipe)
+        except RecipeDetail.DoesNotExist:
+            return Response(status.HTTP_404_NOT_FOUND)
+        
+        
+
+        return Response(status=status.HTTP_200_OK)
+
+
     def get(self, request, *args, **kwargs):
         recipe_id = kwargs.get('recipe_id')
         try:
@@ -65,9 +95,7 @@ class RecipeDetailsListView(APIView):
             return Response(status.HTTP_404_NOT_FOUND)
         json = RecipeDetailSerializer(details, many=True)
         return Response(json.data)
-
-
-class TestView(APIView):
+    
     @transaction.atomic
     def put(self, request, *args, **kwargs):
 
@@ -157,5 +185,35 @@ class TestView(APIView):
     
     @transaction.atomic
     def post(self,request,*args, **kwargs):
-        return Response(status=status.HTTP_200_OK)
+        data = json.loads(request.body)
+        details = data.get('details')
+        recipe_name = data.get('recipe_name')
+        save_id = transaction.savepoint()
+
+        try:
+            recipe = Recipe.objects.create(recipe_name = recipe_name)
+        except Exception as e:
+            transaction.savepoint_rollback(save_id)
+            return Response({"errors":e})
+        
+        
+
+        for detail in details:
+            
+            if detail.get('quantity') == '' or detail.get('ingredient').get('name') == '':
+                transaction.savepoint_rollback(save_id)
+                return Response(status=status.HTTP_204_NO_CONTENT)
+            quantity = detail.get('quantity')
+            unit = detail.get('unit')
+            ingredient_name = detail.get('ingredient').get('name')
+
+            try:
+                ingredient = RecipeIngredient.objects.create(name = ingredient_name)
+                ingredient_detail = RecipeDetail.objects.create(recipe= recipe,ingredient=ingredient,quantity=quantity,unit=unit)
+            except Exception as e:
+                transaction.savepoint_rollback(save_id)
+                return Response({"errors":e})
+
+        return Response(data={'success':True})
+ 
 

@@ -37,7 +37,6 @@ urlpatterns = [
     path('api/recipe/getdetail/<detail_id>',recipeView.RecipeDetailView.as_view()),
     path('api/recipe/getrecipedetails/<recipe_id>',recipeView.RecipeDetailsListView.as_view()),
     path('api/recipe/getrecipeinfo/<recipe_id>',recipeView.RecipeInfoView.as_view()),
-    
-    path('test/post/',recipeView.TestView.as_view()),
+    path('api/recipe/recipedetails/',recipeView.RecipeDetailsListView.as_view()),
 
 ]

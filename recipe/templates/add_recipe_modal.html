@@ -1,0 +1,191 @@
+<!-- Modal -->
+<div class="modal fade" id="AddModal" tabindex="-1" aria-labelledby="AddModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl">
+
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title" id="AddRecipe">Add</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+
+            <div class="modal-body">
+                <div class="'container-fluid">
+                    <form method="post" id="add-form">
+                        <div class="row">
+                            <div class="col">
+                                <label for="recipe-name" class="col-form-label"><b>Recipe Name:</b></label>
+                                <input type="text" class="form-control" id="recipe-name">
+                            </div>
+                        </div>
+
+                        <!-- <div class="row">
+                            <div class="col">
+                                <label for="recipe-describe" class="col-form-label"><b>Recipe Describe:</b></label>
+                                <textarea type="text" class="form-control" id="recipe-describe"></textarea>
+                            </div>
+                        </div>
+
+                        <label for="recipe-picture" class="col-form-label"><b>Recipe Picture:</b></label>
+                        <input class="form-control" type="file" id="recipe-picture-file"> -->
+
+                        <label for="recipe-ingredients" class="col-form-label"><b>Recipe Details:</b></label>
+
+                        <div id="ingredients-input-group">
+                            <div class="row text-center">
+                                <div class="col">
+                                    <label>Name</label>
+                                </div>
+                                <div class="col">
+                                    <label>Quantity</label>
+                                </div>
+                                <div class="col">
+                                    <label>Unit</label>
+                                </div>
+                                <div class="col">
+                                    <label>Operate</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-5">
+                            <button type="button" class="btn btn-outline-primary" id="addBtn">Add Ingredient</button>
+                        </div>
+                    </form>
+                </div>
+
+            </div>
+
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-outline-dark" id="submitForm">Modify</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function(){
+        var AddModal = document.getElementById('AddModal')
+
+        add_ingredient_col_id = 1
+
+        var AddBtn = AddModal.querySelector('#addBtn')
+
+        function clearInputGroup(modal) {
+            var group = modal.querySelector('#ingredients-input-group');
+            while (group.childElementCount > 1) {
+                group.removeChild(group.lastChild);
+            }
+            add_ingredient_col_id = 1
+        }
+    
+        function addModaladdInputs(add_ingredient_col_id) {
+
+            var detail_element = document.createElement('div')
+            detail_element.className = "row text-center"
+            detail_element.id = `ingredient-input-${add_ingredient_col_id}`
+            detail_element.innerHTML = `
+            <div class="col">
+                <input type="text" class="form-control" id="ingredient-name-${add_ingredient_col_id}">
+            </div>
+            <div class="col">
+                <input type="text" class="form-control" id="ingredient-quantity-${add_ingredient_col_id}">
+            </div>
+            <div class="col">
+                <select  class="form-select" id="ingredient-unit-${add_ingredient_col_id}">
+                    <option selected value="g">g</option>
+                    <option value="kg">kg</option>
+                    <option value="oz">oz</option>
+                    <option value="lbs">lbs</option>
+                </select>
+            </div>
+            <div class="col">
+                <button type="button" class="btn" id="ingredient-btn-${add_ingredient_col_id}" onClick="addModalDelDetailBtn(this)">
+                    <i class="bi bi-x-circle"></i>
+                </button>
+            </div>`
+            AddModal.querySelector("#ingredients-input-group").appendChild(detail_element)
+
+        }
+
+        AddBtn.addEventListener('click', function () {
+            add_ingredient_col_id += 1 
+            addModaladdInputs(add_ingredient_col_id)
+             
+        })
+
+        AddModal.addEventListener('show.bs.modal', function (event) {
+            clearInputGroup(AddModal)
+            addModaladdInputs(add_ingredient_col_id)
+        })
+
+        AddModal.addEventListener('hide.bs.modal', function (event) {
+            clearInputGroup(AddModal)
+
+        })
+
+        function inputpack(num) {
+
+            var inputForm = document.getElementById('add-form')
+            var recipe_name = inputForm.querySelector('#recipe-name')
+            var details = []
+            for (let i = 1; i < num + 1; i++) {
+                var detail_name = inputForm.querySelector('#ingredient-name-' + i).value
+                var detail_quantity = inputForm.querySelector('#ingredient-quantity-' + i).value
+                var detail_unit = inputForm.querySelector('#ingredient-unit-' + i).value
+                var detail = {
+                    'quantity': detail_quantity,
+                    'unit': detail_unit,
+                    'ingredient':
+                    {
+                        'name': detail_name
+                    }
+                }
+                details.push(detail)
+
+            }
+            return details
+        }
+
+        
+
+        $('#submitForm').click(function(){
+            var inputForm = document.getElementById('add-form')
+            data = inputpack(add_ingredient_col_id)
+            var recipe_name = inputForm.querySelector('#recipe-name').value
+
+            $.ajax({
+                url: '/api/recipe/recipedetails/',
+                type: 'POST',
+                data: JSON.stringify({
+                    'recipe_name': recipe_name,
+                    'details': data
+                }),
+                contentType: "application/json",
+                dataType: 'json',
+                success: function (response) {
+                    $("#success-modal").modal("show")
+                    setTimeout(function () {
+                        location.reload()
+                    }, 300)
+                }
+            });
+
+        })
+
+    })
+
+    var addModalDelDetailBtn = function (obj){
+            detail_id_str = obj.getAttribute('id')
+            detail_id_list = detail_id_str.split('-')
+            detail_id = detail_id_list[detail_id_list.length-1]
+            console.log(detail_id)
+            input_id = '#ingredient-input-'+detail_id
+            AddModal.querySelector(input_id).remove()
+    }
+
+    
+
+</script>

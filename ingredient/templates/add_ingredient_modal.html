@@ -59,7 +59,7 @@
             var month = date.getMonth() + 1;
             var dates = date.getDate();
             if (month < 10) month = "0" + month;
-            if (date < 10) date = "0" + date;
+            if (dates < 10) dates = "0" + dates;
             var time = year + "-" + month + "-" + dates;
             AddModal.querySelector("#detail-date").value = time
         })

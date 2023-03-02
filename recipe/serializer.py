@@ -33,6 +33,10 @@ class RecipeDetailSerializer(serializers.Serializer):
         instance.ingredient = ingredient
         instance.save()
         return instance
+    
+    # def create(self, validated_data):
+        # detail = OwnIngredientDetail.objects.create(ingredient = self.context['ingredient'],**validated_data)
+        # return detail
 
     class Meta:
         model = RecipeDetail

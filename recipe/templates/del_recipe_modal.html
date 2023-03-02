@@ -11,8 +11,7 @@
 
 
             <div class="modal-body">
-                <label>Deatil Id:<input type="text" class="form-control" id="detail-id" disabled
-                        readonly></input></label>
+                <label>Recipe Id:<input type="text" class="form-control" id="recipe-id" disabled readonly></input></label>
                 <p>Are you sure to delete?</p>
             </div>
 
@@ -37,9 +36,9 @@
 
             var button = event.relatedTarget
 
-            var detail_id = button.getAttribute('data-id')
+            var recipe_id = button.getAttribute('data-id')
 
-            DelModal.querySelector('#detail-id').value = detail_id
+            DelModal.querySelector('#recipe-id').value = recipe_id
 
         });
 
@@ -48,13 +47,13 @@
 
             var DelModal = document.getElementById("DelModal")
 
-            var detail_id = DelModal.querySelector('#detail-id').value
+            var recipe_id = DelModal.querySelector('#recipe-id').value
 
             $.ajax({
-                url: '/api/oi/detail/' + detail_id,
+                url: '/api/recipe/getrecipeinfo/' + recipe_id,
                 type: 'DELETE',
                 data: {
-                    detail_id: detail_id
+                    recipe_id: recipe_id
                 },
                 success: function (response) {
                     $("#success-modal").modal("show")
