@@ -1,0 +1,135 @@
+<!-- Modal -->
+<div class="modal fade" id="UseModal" tabindex="-1" aria-labelledby="UseModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title" id="DelIngredient">Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+
+            <div class="modal-body">
+                <div class="container">
+                    <div class="row text-center">
+                        <b><p>Are you sure you are using this recipe?</p></b>
+                    </div>  
+    
+                    <div class="row">
+                        <div class="col">
+                            <label>Recipe Id:<input type="text" class="form-control" id="recipe-id" disabled readonly></label>
+                        </div>
+                        <div class="col">
+                            <label>Recipe Name:<input type="text" class="form-control" id="recipe-name" disabled readonly></label>
+                        </div>
+                    </div>
+    
+                    <div class="row">
+                        <div class="col">
+                            <table class="table" id="use-detail-table">
+                                <thead>
+                                    <tr>
+                                        <th>Ingredient</th>
+                                        <th>Original</th>
+                                        <th>After</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="use-detail-content">
+
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-outline-primary" id="useForm-btn">Use</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+
+
+
+<script>
+    $(document).ready(function () {
+
+        var UseModal = document.getElementById("UseModal")
+
+        UseModal.addEventListener('show.bs.modal', function (event) {
+
+            var button = event.relatedTarget
+
+            var recipe_id = button.getAttribute('data-id')
+
+            UseModal.querySelector('#recipe-id').value = recipe_id
+
+            $.ajax({
+                url:'/api/recipe/recipecheck/' + recipe_id,
+                type: 'get',
+                async: false,
+                success: function(data){
+
+                    tbody = UseModal.querySelector('#use-detail-content')
+                    tbody.innerHTML = ''
+                    UseModal.querySelector('#recipe-name').value = data.recipe_name
+                    details = data.details
+                    all_enough = data.all_enough
+                    for(let i = 0;i<details.length;i++){
+                        name = details[i].ingredient_name
+                        origin_quantity = details[i].origin_quantity
+                        after_quantity = details[i].after_quantity
+                        unit = details[i].unit
+                        enough = details[i].enough
+
+                        var tr_element = document.createElement('tr')
+                        if(enough == false){
+                            tr_element.className = "table-danger"
+                        }
+                        tr_element.innerHTML = `<td>${name}</td><td>${origin_quantity} ${unit}</td><td>${after_quantity} ${unit}</td>`
+                        tbody.appendChild(tr_element)
+                    }
+
+                    if(all_enough == true){
+                        UseModal.querySelector('#useForm-btn').disabled = false
+                    }else{
+                        UseModal.querySelector('#useForm-btn').disabled = true
+                    }
+
+                }
+            })
+
+        });
+
+
+        $('#useForm-btn').click(function () {
+
+            var UseModal = document.getElementById("UseModal")
+
+            var recipe_id = UseModal.querySelector('#recipe-id').value
+
+            $.ajax({
+                url: '/api/recipe/recipecheck/' + recipe_id,
+                type: 'PUT',
+                data: JSON.stringify({
+                    'recipe_id': recipe_id
+                    }),
+                success: function (response) {
+                    $("#success-modal").modal("show")
+                    setTimeout(function () {
+                        location.reload()
+                    }, 300);
+                }
+            });
+
+
+        })
+    })
+</script>
