@@ -15,22 +15,22 @@
   {% endblock %}
 </head>
 
-<body>
+<body class="d-flex flex-column" style="height: 100vh;">
 
   <header>
     <!-- Include navigation.html -->
     {% include "navigation.html" %}
   </header>
 
-  <main class="container">
-
-    <div class="row mt-3">
-      <div class="col-12">
-        <!-- this block can be replaced with main content here -->
-        {% block content %}{% endblock %}
+  <main class="flex-grow-1">
+    <div class="container">
+      <div class="row mt-3">
+        <div class="col-12">
+          <!-- this block can be replaced with main content here -->
+          {% block content %}{% endblock %}
+        </div>
       </div>
     </div>
-
   </main>
   <!-- include footer.html -->
   {% include "footer.html" %}
