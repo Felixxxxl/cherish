@@ -22,7 +22,7 @@ class ExpiredProcessHnadler:
 
         for record in expired_records:
                 log_record = IngredientStatusLog.objects.create(
-                    ingredient=record.ingredient,
+                    ingredient=record.ingredient.name,
                     quantity=record.quantity * UNIT_TRANS_DICT[record.quantity_unit],
                     date=record.expiry_date)
                 record.delete()
