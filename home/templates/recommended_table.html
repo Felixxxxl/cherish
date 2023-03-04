@@ -1,0 +1,116 @@
+<!-- <script src="/static/js/bootstrap.bundle.js"></script> -->
+<link href="/static/bootstrap-table/themes/bootstrap-table/bootstrap-table.css" rel="stylesheet">
+<link rel="stylesheet" href="/static/css/bootstrap-icons.css">
+<script src="/static/bootstrap-table/bootstrap-table.js"></script>
+<script src="/static/bootstrap-table/themes/bootstrap-table/bootstrap-table.js"></script>
+<link href="/static/css/bootstrap.css" rel="stylesheet">
+{% include "use_recipe_modal.html" %}
+<div class="container">
+    <div class="row">
+        <div class="col">
+            <table id="RecipesTable"></table>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function(){
+        $('#RecipesTable').bootstrapTable('destroy').bootstrapTable({
+            url : '/api/home/recommended/',
+            method : 'get',
+            uniqueId : 'recipe_id',
+            cache : false,
+            classes : 'table table-borderless',
+            headerStyle : {classes : ' table-dark '},
+            columns : [
+                {
+                    field : 'recipe_id',
+                    title : 'Recipe Id',
+                    align : 'center',
+                    valign : 'middle'
+                },
+                {
+                    field : 'recipe_name',
+                    title : 'Recipe Name',
+                    align : 'center',
+                    valign : 'middle'
+                },
+                {
+                    field : 'recipe_ingredients',
+                    title : 'Recipe Ingredients',
+                    align : 'center',
+                    valign : 'middle',
+                    formatter: ingredientsTableFormatter
+                },
+                {
+                    field: 'operate',
+                    title: 'Operate',
+                    align: 'center',
+                    valign: 'middle',
+                    formatter: operateFormatter
+
+                }
+                
+            ]
+        })
+
+        document.HTMLDOMtoString = function(HTMLDOM){
+            const div = document.createElement("div")
+            div.appendChild(HTMLDOM)
+            return div.innerHTML
+        }
+
+        function ingredientsTableFormatter(value,row,$index){
+            table = document.createElement('table')
+            var data;
+            $.ajax({
+                async:false,
+                url: '/api/recipe/getrecipedetails/' + row.recipe_id,
+                type: 'get',
+                success: function (response) {
+                    data = response
+                }
+            })
+            ingredientTable(data,table)
+            return document.HTMLDOMtoString(table)
+        }
+
+        function operateFormatter(value,row,index){
+            return [
+            '<button type="button" class="btn primary" data-id="',row.recipe_id,'"data-bs-toggle="modal" data-bs-target="#UseModal">','Use','</button>'
+            ].join('')
+        }
+
+        function ingredientTable(data,cur_table){
+            $(cur_table).bootstrapTable({
+                data:data,
+                classes: 'table',
+                headerStyle : {classes:'table-info'},
+                columns:[
+                    {
+                        field: 'ingredient.name',
+                        title: 'Ingredient Name',
+                        align: 'center',
+                        valign: 'middle'
+
+                    },
+                    {
+                        field: 'quantity',
+                        title: 'Quantity',
+                        align: 'center',
+                        valign: 'middle'
+
+                    },
+                    {
+                        field: 'unit',
+                        title: 'Unit',
+                        align: 'center',
+                        valign: 'middle'
+
+                    }
+                ]
+            })
+        }
+
+    })
+</script>
