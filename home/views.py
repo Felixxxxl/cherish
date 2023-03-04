@@ -8,6 +8,8 @@ from recipe.models import RecipeDetail,Recipe
 from recipe.serializer import RecipeSerializer
 from django.db.models import F,Func,FloatField,Case,When,IntegerField,ExpressionWrapper,Avg,Sum,Value
 from django.db.models.functions import Exp,Cast,Abs,Power
+from .models import IngredientStatusLog
+from .serializers import IngredientStatusLogSerializer
 # Create your views here.
 
 UNIT_TRANS_DICT = {
@@ -19,6 +21,9 @@ UNIT_TRANS_DICT = {
 
 def homePage(request):
     return render(request,'home.html')
+
+def logPage(request):
+    return render(request,'log.html')
 
 class RecommedRecipesView(APIView):
     def get(self,request,*args, **kwargs):
@@ -96,5 +101,14 @@ class RecommedRecipesView(APIView):
         recipes = Recipe.objects.filter(recipe_id__in = recipe_list)
         json = RecipeSerializer(recipes, many=True)
         return Response(json.data)
+
+
+class WastingLogView(APIView):
+    def get(self,request,*args, **kwargs):
+        log = IngredientStatusLog.objects.all()
+        json = IngredientStatusLogSerializer(log,many=True)
+        return Response(json.data)
+    
+
 
 

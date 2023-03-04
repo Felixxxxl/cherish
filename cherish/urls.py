@@ -26,6 +26,7 @@ urlpatterns = [
     path('', RedirectView.as_view(url='home/',permanent = True)),
     path('ingredient/',ingredientView.ingredientsPage,name='ingredient'),
     path('recipe/',recipeView.recipePage,name='recipe'),
+    path('log/',homeView.logPage,name='log'),
 
     path('api/oi/getcategorylist/',ingredientView.OwnIngredientCategoryView.as_view()),
     path('api/oi/getdetailslist/<ingredient_id>',ingredientView.OwnIngredientDetailsListView.as_view()),
@@ -41,5 +42,6 @@ urlpatterns = [
     path('api/recipe/recipecheck/<recipe_id>',recipeView.RecipeDetailCheckView.as_view()),
 
     path('api/home/recommended/',homeView.RecommedRecipesView.as_view()),
+    path('api/home/wastelog/',homeView.WastingLogView.as_view()),
 
 ]
