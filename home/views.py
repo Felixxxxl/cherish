@@ -8,7 +8,6 @@ from recipe.models import RecipeDetail,Recipe
 from recipe.serializer import RecipeSerializer
 from django.db.models import F,Func,FloatField,Case,When,IntegerField,ExpressionWrapper,Avg,Sum,Value
 from django.db.models.functions import Exp,Cast,Abs,Power
-from django.utils import timesince
 # Create your views here.
 
 UNIT_TRANS_DICT = {
