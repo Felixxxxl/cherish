@@ -1,8 +1,11 @@
-<footer class="container">
-    <p class="text-center" id="footer"></p>
-</footer>
+<div class="container">
+    <footer class="sticky-footer">
+        <p class="text-center" id="footer"></p>
+    </footer>
+</div>
+
 <script>
     var d = new Date() 
-    var content = "Copyright © "+ d.getFullYear() + " CHERISH"
+    var content = d.getFullYear() + " CHERISH"
     document.getElementById('footer').innerText = content
 </script>

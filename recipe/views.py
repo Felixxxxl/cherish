@@ -198,8 +198,14 @@ class RecipeDetailsListView(APIView):
             unit = detail.get('unit')
             ingredient_name = detail.get('ingredient').get('name')
 
+
+
             try:
+                ingredient = RecipeIngredient.objects.get(name = ingredient_name)
+            except Exception as e:
                 ingredient = RecipeIngredient.objects.create(name = ingredient_name)
+
+            try:
                 ingredient_detail = RecipeDetail.objects.create(recipe= recipe,ingredient=ingredient,quantity=quantity,unit=unit)
             except Exception as e:
                 transaction.savepoint_rollback(save_id)

@@ -24,6 +24,10 @@
           <a class="nav-link {% if request.path == '/recipe/' %}active{% endif %}" href="{% url 'recipe' %}" href="#">RECIPES</a>
         </li>
 
+        <li class="nav-item">
+          <a class="nav-link {% if request.path == '/log/' %}active{% endif %}" href="{% url 'log' %}" href="#">LOG</a>
+        </li>
+
       </ul>
     </div>
   </div>

@@ -1,0 +1,65 @@
+<!-- <script src="/static/js/bootstrap.bundle.js"></script> -->
+<link href="/static/bootstrap-table/themes/bootstrap-table/bootstrap-table.css" rel="stylesheet">
+<link rel="stylesheet" href="/static/css/bootstrap-icons.css">
+<script src="/static/bootstrap-table/bootstrap-table.js"></script>
+<script src="/static/bootstrap-table/themes/bootstrap-table/bootstrap-table.js"></script>
+<link href="/static/css/bootstrap.css" rel="stylesheet">
+
+
+<div class="container">
+    
+    <div class="row">
+        <div class="col">
+            <table id="LogTable"></table>
+        </div>
+    </div>
+
+    
+</div>
+
+
+<script>
+    $(document).ready(function () {
+
+        $('#LogTable').bootstrapTable('destroy').bootstrapTable({
+            url: '/api/home/wastelog/',
+            method: 'get',
+            uniqueId: "Log_id",
+            detailViewIcon: true,
+            cache: false, 
+            classes: "table table-borderless",
+            headerStyle:{classes:"table-dark"},
+            rowStyle:{classes:"table-primary"},
+            columns: [
+                {
+                    field: "log_id",
+                    title: "Log Id",
+                    align: "center",
+                    valign: "middle",
+                },
+                {
+                    field: 'ingredient_name',
+                    title: 'Ingredient',
+                    align: "center",
+                }
+                ,
+                {
+                    field: 'quantity',
+                    title: 'Quantity',
+                    align: 'center',
+                    valign: 'middle',
+                    formatter:function(value,row,$index){
+                        return `${value} g`
+                    }
+                },
+                {
+                    field: 'date',
+                    title: 'Expired Date',
+                    align: 'center',
+                    valign: 'middle'
+                }
+            ]
+        });
+
+    })
+</script>

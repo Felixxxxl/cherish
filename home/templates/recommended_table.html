@@ -4,27 +4,19 @@
 <script src="/static/bootstrap-table/bootstrap-table.js"></script>
 <script src="/static/bootstrap-table/themes/bootstrap-table/bootstrap-table.js"></script>
 <link href="/static/css/bootstrap.css" rel="stylesheet">
-{% include "recipe_modal.html" %}
+{% include "use_recipe_modal.html" %}
 <div class="container">
-    
-    <div class="row">
-        <div class="col mb-1 ">
-            <button type="button" class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#AddModal"><i class="bi bi-plus-square"></i> Add Recipe</button>
-        </div>
-    </div>
-
     <div class="row">
         <div class="col">
             <table id="RecipesTable"></table>
         </div>
     </div>
-
 </div>
 
 <script>
     $(document).ready(function(){
         $('#RecipesTable').bootstrapTable('destroy').bootstrapTable({
-            url : '/api/recipe/getrecipelist/',
+            url : '/api/home/recommended/',
             method : 'get',
             uniqueId : 'recipe_id',
             cache : false,
@@ -85,8 +77,6 @@
 
         function operateFormatter(value,row,index){
             return [
-            '<button type="button" class="btn primary" data-id="',row.recipe_id,'"data-bs-toggle="modal" data-bs-target="#EditModal">','<i class="bi bi-pencil"></i>','</button>',
-            '<button type="button" class="btn primary" data-id="',row.recipe_id,'"data-bs-toggle="modal" data-bs-target="#DelModal">','<i class="bi bi-trash3"></i>','</button>',
             '<button type="button" class="btn primary" data-id="',row.recipe_id,'"data-bs-toggle="modal" data-bs-target="#UseModal">','Use','</button>'
             ].join('')
         }
