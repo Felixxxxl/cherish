@@ -29,7 +29,7 @@ class RecipesListView(APIView):
         return Response(json.data)
 
 
-class RecipeIngreidentView(APIView):
+class RecipeIngredientView(APIView):
     def get(self, request, *args, **kwargs):
         ingredient_id = kwargs.get('ingredient_id')
         try:
