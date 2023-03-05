@@ -1,29 +1,39 @@
+<!-- This is a navbar with a brand name "CHERISH" -->
 <nav class="navbar navbar-dark bg-dark navbar-expand-md">
 
+  <!-- A container for holding the brand name and items in navbar-->
   <div class="container-fluid">
 
+    <!-- The clickable brand name on the left side of the navbar that redirects to home page-->
     <a class="navbar-brand" href="{% url 'home' %}">CHERISH</a>
 
+    <!-- Hamburger menu button for small screens-->
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
       <span class="navbar-toggler-icon"></span>
     </button>
 
-
+    <!-- Section for collapsing/expanding menu items as per screen size-->
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav">
 
+        <!-- First item of navbar, HOME which is used to link to the home page-->
         <li class="nav-item">
           <a class="nav-link {% if request.path == '/home/' %}active{% endif %}" href="{% url 'home' %}">HOME</a>
         </li>
 
+        <!-- Second item of navbar, INGREDIENTS which links to ingredient page-->
         <li class="nav-item">
-          <a class="nav-link {% if request.path == '/ingredient/' %}active{% endif %}" href="{% url 'ingredient' %}">INGREDIENTS</a>
+          <a class="nav-link {% if request.path == '/ingredient/' %}active{% endif %}"
+            href="{% url 'ingredient' %}">INGREDIENTS</a>
         </li>
 
+        <!-- Third item of navbar, RECIPES which links to recipes page-->
         <li class="nav-item">
-          <a class="nav-link {% if request.path == '/recipe/' %}active{% endif %}" href="{% url 'recipe' %}" href="#">RECIPES</a>
+          <a class="nav-link {% if request.path == '/recipe/' %}active{% endif %}" href="{% url 'recipe' %}"
+            href="#">RECIPES</a>
         </li>
 
+        <!-- Fourth item of navbar, LOG which links to log page-->
         <li class="nav-item">
           <a class="nav-link {% if request.path == '/log/' %}active{% endif %}" href="{% url 'log' %}" href="#">LOG</a>
         </li>
