@@ -43,5 +43,6 @@ urlpatterns = [
 
     path('api/home/recommended/',homeView.RecommedRecipesView.as_view()),
     path('api/home/wastelog/',homeView.WastingLogView.as_view()),
+    path('api/home/wastelogchart/',homeView.WastingLogChartView.as_view()),
 
 ]

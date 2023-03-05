@@ -108,6 +108,19 @@ class WastingLogView(APIView):
         log = IngredientStatusLog.objects.all()
         json = IngredientStatusLogSerializer(log,many=True)
         return Response(json.data)
+
+class WastingLogChartView(APIView):
+    def get(self,request,*args, **kwargs):
+        logs = IngredientStatusLog.objects.all()
+        logs = logs.values('ingredient_name').annotate(sum_quantity=Sum('quantity'))
+
+        name_list = []
+        quantity_list = []
+
+        for log in logs:
+            name_list.append(log.get('ingredient_name'))
+            quantity_list.append(log.get('sum_quantity'))
+        return Response({"label":name_list,"data":quantity_list})
     
 
 
