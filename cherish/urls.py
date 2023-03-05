@@ -34,7 +34,7 @@ urlpatterns = [
     path('api/oi/detail/',ingredientView.OwnIngredientDetailView.as_view()),
 
     path('api/recipe/getrecipelist/',recipeView.RecipesListView.as_view()),
-    path('api/recipe/getingredient/<ingredient_id>',recipeView.RecipeIngreidentView.as_view()),
+    path('api/recipe/getingredient/<ingredient_id>',recipeView.RecipeIngredientView.as_view()),
     path('api/recipe/getdetail/<detail_id>',recipeView.RecipeDetailView.as_view()),
     path('api/recipe/getrecipedetails/<recipe_id>',recipeView.RecipeDetailsListView.as_view()),
     path('api/recipe/getrecipeinfo/<recipe_id>',recipeView.RecipeInfoView.as_view()),
