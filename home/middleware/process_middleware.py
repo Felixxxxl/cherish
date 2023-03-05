@@ -1,6 +1,6 @@
 from django.db import transaction
 from datetime import date
-from ingredient.models import OwnIngredientDetail
+from ingredient.models import OwnIngredientDetail,OwnIngredient
 from home.models import IngredientStatusLog
 
 UNIT_TRANS_DICT = {
@@ -25,7 +25,17 @@ class ExpiredProcessHnadler:
                     ingredient_name=record.ingredient.name,
                     quantity=record.quantity * UNIT_TRANS_DICT[record.quantity_unit],
                     date=record.expiry_date)
+
+                details = OwnIngredientDetail.objects.filter(ingredient__name = record.ingredient.name)
+                print(record.ingredient.name)
+
                 record.delete()
+                
+                if not details.exists():
+                    category = OwnIngredient.objects.get(name = record.ingredient.name)
+                    category.delete()
+                
+                
 
         return response
 
