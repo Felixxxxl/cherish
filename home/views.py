@@ -3,7 +3,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from datetime import date,timedelta
-from ingredient.models import OwnIngredientDetail
+from ingredient.models import OwnIngredientDetail,OwnIngredient
 from recipe.models import RecipeDetail,Recipe
 from recipe.serializer import RecipeSerializer
 from django.db.models import F,Func,FloatField,Case,When,IntegerField,ExpressionWrapper,Avg,Sum,Value
@@ -25,8 +25,29 @@ def homePage(request):
 def logPage(request):
     return render(request,'log.html')
 
+# Create a RecommedRecipesView that inherits APIView to handle HTTP GET request.
 class RecommedRecipesView(APIView):
     def get(self,request,*args, **kwargs):
+
+        # Filter recipes with existing ingredients and return recipe arrays
+        recipes = Recipe.objects.all()
+        recipes_list = []
+        for recipe in recipes:
+            
+            details = RecipeDetail.objects.filter(recipe=recipe)
+            ingredient_enough = True
+            for detail in details:
+
+                try:
+                    OwnIngredient.objects.get(name=detail.ingredient.name)
+                except:
+                    ingredient_enough =False
+                    break
+            
+            if ingredient_enough == True:
+                recipes_list.append(recipe)
+
+        # Define the scoring coefficient, quality coefficient and time coefficient
         quantity_k = 0.3
         expiry_date_k = 0.7
 
@@ -62,8 +83,10 @@ class RecommedRecipesView(APIView):
         for oi in oi_quantity:
             oi_quantity_list[oi.get('ingredient__name')] = oi.get('total_quantity')
 
+        recipe_details = RecipeDetail.objects.filter(recipe__in=recipes_list)
 
-        recipe_details = RecipeDetail.objects.annotate(
+
+        recipe_details = recipe_details.annotate(
             name = F('ingredient__name')
         )
 
@@ -86,13 +109,17 @@ class RecommedRecipesView(APIView):
                 output_field=FloatField())
         )
 
+        
+
+        recipe_details = recipe_details.filter(quantity__lt=F('total_quantity'))
+
         recipe_details =recipe_details.annotate(
             fscore = F('quantity') / F('total_quantity') * F('oi_score')
 
         )
 
         fscore = recipe_details.values('recipe__recipe_id').annotate(sum_fscore=Sum('fscore')).order_by("-sum_fscore")[:5]
-        print(fscore)
+
         recipe_list = []
         for item in fscore:
             recipe_list.append(item.get('recipe__recipe_id'))
@@ -103,24 +130,36 @@ class RecommedRecipesView(APIView):
         return Response(json.data)
 
 
+# Create a WastingLogView that inherits APIView to handle HTTP GET request.
 class WastingLogView(APIView):
-    def get(self,request,*args, **kwargs):
-        log = IngredientStatusLog.objects.all()
-        json = IngredientStatusLogSerializer(log,many=True)
-        return Response(json.data)
 
-class WastingLogChartView(APIView):
+    # Define get method to handle GET requests made to the API endpoint url.
     def get(self,request,*args, **kwargs):
+
+        # Query IngredientStatusLog model to retrieve all logs in the database.
         logs = IngredientStatusLog.objects.all()
-        logs = logs.values('ingredient_name').annotate(sum_quantity=Sum('quantity'))
 
-        name_list = []
-        quantity_list = []
+        # Serialize the data returned by the query into JSON format.
+        serializer = IngredientStatusLogSerializer(logs, many=True)
 
-        for log in logs:
-            name_list.append(log.get('ingredient_name'))
-            quantity_list.append(log.get('sum_quantity'))
-        return Response({"label":name_list,"data":quantity_list})
+        # Return the serialized data as a response with status 200 (OK).
+        return Response(serializer.data)
+
+# The following class obtain a list of IngredientStatusLog objects 
+class WastingLogChartView(APIView):
+
+    # The method handles GET requests and retrieve data log from the database
+    def get(self, request, *args, **kwargs):
+        
+        # Query objects, group by ingredient name and calculate sum of corresponding quantities
+        logs = IngredientStatusLog.objects.values('ingredient_name').annotate(sum_quantity=Sum('quantity'))
+
+        # Retrieve two lists with ingredients names and its corresponding quanitity
+        name_quantity_tuples = [(log['ingredient_name'], log['sum_quantity']) for log in logs]
+        labels, data = zip(*name_quantity_tuples)
+
+        # Return HTTP response with 'data' and 'labels' fields containing quantity and ingedients names.
+        return Response({"label": labels, "data": data})
     
 
 
