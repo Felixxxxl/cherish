@@ -29,6 +29,50 @@ def logPage(request):
 class RecommedRecipesView(APIView):
     def get(self,request,*args, **kwargs):
 
+        # Define the scoring coefficient, quality coefficient and time coefficient
+        quantity_k = 0.3
+        expiry_date_k = 0.7
+
+        # Convert the quality of the ingredients in the existing ingredients to gram
+        all_details = OwnIngredientDetail.objects.annotate(
+            normalized_quantity = Case(
+                    When(quantity_unit='kg',then=F('quantity') * 1000),
+                    When(quantity_unit='lbs',then=F('quantity') * 453.59),
+                    When(quantity_unit='oz',then=F('quantity') * 28.35),
+                    default=F('quantity'),
+                    output_field=FloatField()
+            )
+        )
+
+        # Get the date of the day
+        today = date.today()
+    
+        # Calculate the remaining days of the existing ingredients
+        all_details = all_details.annotate(
+            remaining_date = ExpressionWrapper((F('expiry_date')-today) / 3600 / 24 / 1000 /1000, output_field = IntegerField())
+        )
+
+        # Use the quality of the ingredients and the expiration date of the ingredients to score the ingredients
+        # Formula: socre = exp(quantity * quality coefficient / (remaining days * time coefficient))
+        all_details = all_details.annotate(
+            score = Exp(F('normalized_quantity') * quantity_k /F('remaining_date') / expiry_date_k)
+        )
+
+        # Statistics the total quality of the same type of ingredients
+        oi_quantity = all_details.values('ingredient__name').annotate(total_quantity=Sum('normalized_quantity'))
+
+        # Statistically, the average score of the same type of ingredients
+        oi_score = all_details.values('ingredient__name').annotate(avg_score=Avg('score')).order_by("-avg_score")
+
+        # Output the above calculation into a dictionary form
+        oi_list = {}
+        for oi in oi_score:
+            oi_list[oi.get('ingredient__name')] = oi.get('avg_score')
+
+        oi_quantity_list = {}
+        for oi in oi_quantity:
+            oi_quantity_list[oi.get('ingredient__name')] = oi.get('total_quantity')
+
         # Filter recipes with existing ingredients and return recipe arrays
         recipes = Recipe.objects.all()
         recipes_list = []
@@ -47,50 +91,17 @@ class RecommedRecipesView(APIView):
             if ingredient_enough == True:
                 recipes_list.append(recipe)
 
-        # Define the scoring coefficient, quality coefficient and time coefficient
-        quantity_k = 0.3
-        expiry_date_k = 0.7
-
-        all_details = OwnIngredientDetail.objects.annotate(
-            normalized_quantity = Case(
-                    When(quantity_unit='kg',then=F('quantity') * 1000),
-                    When(quantity_unit='lbs',then=F('quantity') * 453.59),
-                    When(quantity_unit='oz',then=F('quantity') * 28.35),
-                    default=F('quantity'),
-                    output_field=FloatField()
-            )
-        )
-
-        today = date.today()
-    
-        all_details = all_details.annotate(
-            remaining_date = ExpressionWrapper((F('expiry_date')-today) / 3600 / 24 / 1000 /1000, output_field = IntegerField())
-        )
-
-        all_details = all_details.annotate(
-            score = Exp(F('normalized_quantity') * quantity_k /F('remaining_date') / expiry_date_k)
-        )
-
-        oi_quantity = all_details.values('ingredient__name').annotate(total_quantity=Sum('normalized_quantity'))
-
-        oi_score = all_details.values('ingredient__name').annotate(avg_score=Avg('score')).order_by("-avg_score")
-
-        oi_list = {}
-        for oi in oi_score:
-            oi_list[oi.get('ingredient__name')] = oi.get('avg_score')
-
-        oi_quantity_list = {}
-        for oi in oi_quantity:
-            oi_quantity_list[oi.get('ingredient__name')] = oi.get('total_quantity')
 
         recipe_details = RecipeDetail.objects.filter(recipe__in=recipes_list)
 
-
+        # Format recipe name
         recipe_details = recipe_details.annotate(
             name = F('ingredient__name')
         )
 
+        
         recipe_details = recipe_details.annotate(
+            # The quality in the recipes is converted to gram
             normalized_quantity = Case(
                     When(unit='kg',then=F('quantity') * 1000),
                     When(unit='lbs',then=F('quantity') * 453.59),
