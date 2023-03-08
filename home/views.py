@@ -6,7 +6,7 @@ from datetime import date,timedelta
 from ingredient.models import OwnIngredientDetail,OwnIngredient
 from recipe.models import RecipeDetail,Recipe
 from recipe.serializer import RecipeSerializer
-from django.db.models import F,Func,FloatField,Case,When,IntegerField,ExpressionWrapper,Avg,Sum,Value
+from django.db.models import F,Func,FloatField,Case,When,IntegerField,ExpressionWrapper,Avg,Sum,Value,Q
 from django.db.models.functions import Exp,Cast,Abs,Power
 from .models import IngredientStatusLog
 from .serializers import IngredientStatusLogSerializer
@@ -26,8 +26,24 @@ def logPage(request):
     return render(request,'log.html')
 
 # Create a RecommedRecipesView that inherits APIView to handle HTTP GET request.
-class RecommedRecipesView(APIView):
+class RecommendRecipesView(APIView):
+    """ 
+    A view to handle HTTP GET requests to recommend recipes 
+
+    HTTP Methods:
+    - GET: Handles GET requests to recommend recipes
+    """
     def get(self,request,*args, **kwargs):
+        """
+        A method that handles GET requests to recommend recipes
+
+        Parameters:
+        - request: The request object.
+
+        Returns:
+        - Response: Recommended recipe(s) serialized as JSON objects
+        """
+
 
         # Define the scoring coefficient, quality coefficient and time coefficient
         quantity_k = 0.3
@@ -42,21 +58,15 @@ class RecommedRecipesView(APIView):
                     default=F('quantity'),
                     output_field=FloatField()
             )
-        )
-
-        # Get the date of the day
-        today = date.today()
-    
-        # Calculate the remaining days of the existing ingredients
-        all_details = all_details.annotate(
-            remaining_date = ExpressionWrapper((F('expiry_date')-today) / 3600 / 24 / 1000 /1000, output_field = IntegerField())
-        )
-
-        # Use the quality of the ingredients and the expiration date of the ingredients to score the ingredients
-        # Formula: socre = exp(quantity * quality coefficient / (remaining days * time coefficient))
-        all_details = all_details.annotate(
+            # Calculate the remaining days of the existing ingredients
+        ).annotate(
+            remaining_date = ExpressionWrapper((F('expiry_date')-date.today()) / 3600 / 24 / 1000 /1000, output_field = IntegerField())
+            # Use the quality of the ingredients and the expiration date of the ingredients to score the ingredients
+            # Formula: socre = exp(quantity * quality coefficient / (remaining days * time coefficient))
+        ).annotate(
             score = Exp(F('normalized_quantity') * quantity_k /F('remaining_date') / expiry_date_k)
         )
+
 
         # Statistics the total quality of the same type of ingredients
         oi_quantity = all_details.values('ingredient__name').annotate(total_quantity=Sum('normalized_quantity'))
@@ -121,8 +131,9 @@ class RecommedRecipesView(APIView):
         )
 
         
-
-        recipe_details = recipe_details.filter(quantity__lt=F('total_quantity'))
+        excluded_recipes_id = recipe_details.filter(normalized_quantity__gt=F('total_quantity')).values('recipe__recipe_id')
+        
+        recipe_details = recipe_details.exclude(Q(recipe__recipe_id__in=excluded_recipes_id))
 
         recipe_details =recipe_details.annotate(
             fscore = F('quantity') / F('total_quantity') * F('oi_score')
@@ -143,9 +154,27 @@ class RecommedRecipesView(APIView):
 
 # Create a WastingLogView that inherits APIView to handle HTTP GET request.
 class WastingLogView(APIView):
+    """ 
+    A view to handle HTTP GET requests for IngredientStatusLog model.
+  
+    HTTP Methods:
+    - GET: Returns JSON serialized data of all objects in IngredientStatusLog model.
+    
+    """
 
     # Define get method to handle GET requests made to the API endpoint url.
     def get(self,request,*args, **kwargs):
+        """
+        Get all objects in the IngredientStatusLog model from database.
+        Serialize each object using IngredientStatusLogSerializer.
+        Retrieve all serialized objects as list of JSON serialized data.
+
+        Parameters:
+        - request: The request object.
+
+        Returns:
+        - Response: A JSON response object containing the list of serialized data.
+        """
 
         # Query IngredientStatusLog model to retrieve all logs in the database.
         logs = IngredientStatusLog.objects.all()
@@ -158,9 +187,30 @@ class WastingLogView(APIView):
 
 # The following class obtain a list of IngredientStatusLog objects 
 class WastingLogChartView(APIView):
+    """ 
+    
+    This view handles HTTP GET requests to retrieve data for ingredient wasting logs chart.
+
+    HTTP Methods:
+    - GET: Retrieves and returns waste log data with labels and data values.
+
+    """
 
     # The method handles GET requests and retrieve data log from the database
     def get(self, request, *args, **kwargs):
+        """
+        
+        Retrieves all objects from the IngredientStatusLog model, and extracts their ingredient name and quantity.
+        Formats the extracted data into two lists containing the ingredient names and corresponding quantities.
+        Returns a JSON response object containing 'labels' and 'data' fields with the formatted data.
+
+        Parameters:
+        - request: The request object.
+
+        Returns:
+        - Response: A JSON response object containing 'label' and 'data' fields.
+        """
+
         
         # Query objects, group by ingredient name and calculate sum of corresponding quantities
         logs = IngredientStatusLog.objects.values('ingredient_name').annotate(sum_quantity=Sum('quantity'))

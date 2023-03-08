@@ -300,6 +300,7 @@ class RecipeDetailsListView(APIView):
             recipe = Recipe.objects.create(recipe_name=recipe_name)
         except Exception as e:
             # Return a not found response in case of error 
+            
             return Response(status=status.HTTP_404_NOT_FOUND)
 
         # Loop through each detail in the list of details
@@ -313,7 +314,7 @@ class RecipeDetailsListView(APIView):
             unit = detail['unit']
             ingredient_name = detail['ingredient']['name']
             # Try to get the RecipeIngredient with the given name and create it if it doesn't exist
-            ingredient = RecipeIngredient.objects.get_or_create(name=ingredient_name)
+            ingredient,_ = RecipeIngredient.objects.get_or_create(name=ingredient_name)
 
             try:
                 # Create a new RecipeDetail object with the recipe, ingredient, quantity, and unit
@@ -324,6 +325,7 @@ class RecipeDetailsListView(APIView):
                     unit=unit)
             except Exception as e:
                 # Rollback the transaction in case of error and return a not found response
+                print(e)
                 transaction.savepoint_rollback(save_id)
                 return Response(status=status.HTTP_404_NOT_FOUND)
         # Return a success response
