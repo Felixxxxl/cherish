@@ -1,5 +1,6 @@
 from django.db import models
 
+
 class OwnIngredient(models.Model):
     """
     A model class representing an own ingredient.
@@ -11,7 +12,8 @@ class OwnIngredient(models.Model):
     name = models.CharField(max_length=64, unique=True)
 
     def __str__(self):
-        return self.ingredient_id
+        return 'OwnIngredient'
+
 
 class OwnIngredientDetail(models.Model):
     """
@@ -20,11 +22,13 @@ class OwnIngredientDetail(models.Model):
     """
     # primary key for this model
     detail_id = models.AutoField(primary_key=True)
-    # foreign key to the OwnIngredient model, on_delete means what to do when an ingredient is deleted, 
+    # foreign key to the OwnIngredient model, on_delete means what to do when an ingredient is deleted,
     # CASCADE means to also delete all OwnIngredientDetails that reference it.
-    # related_name creates a reverse relation from OwnIngredient to its details, which can be used to access 
+    # related_name creates a reverse relation from OwnIngredient to its details, which can be used to access
     # all details for a specific ingredient.
-    ingredient = models.ForeignKey(OwnIngredient, on_delete=models.CASCADE, related_name="details")
+    ingredient = models.ForeignKey(OwnIngredient,
+                                   on_delete=models.CASCADE,
+                                   related_name="details")
     # quantity of the ingredient, stored as a float
     quantity = models.FloatField()
     # unit for the quantity of the ingredient, maximum length 16 characters
@@ -33,5 +37,4 @@ class OwnIngredientDetail(models.Model):
     expiry_date = models.DateField()
 
     def __str__(self):
-        return self.detail_id
-    
+        return "OwnIngredientDetail"

@@ -4,12 +4,8 @@ from datetime import datetime
 from django.db.models import Min
 
 # A dictionary that maps units to their corresponding gram weight
-UNIT_TRANS_DICT = {
-    'g': 1,
-    'kg':1000,
-    'oz':28.35,
-    'lbs':453.59
-}
+UNIT_TRANS_DICT = {'g': 1, 'kg': 1000, 'oz': 28.35, 'lbs': 453.59}
+
 
 class OICategorySerializer(serializers.Serializer):
     """
@@ -20,6 +16,7 @@ class OICategorySerializer(serializers.Serializer):
         model = OwnIngredient
         fields = '__all__'
 
+
 class OICategoryCountSerializer(serializers.Serializer):
     """ 
     Serializer class to represent the information of each OwnIngredient.
@@ -27,11 +24,12 @@ class OICategoryCountSerializer(serializers.Serializer):
     """
     ingredient_id = serializers.IntegerField()
     name = serializers.CharField()
-    quantity_and_unit = serializers.SerializerMethodField(method_name='get_quantity_and_unit')
+    quantity_and_unit = serializers.SerializerMethodField(
+        method_name='get_quantity_and_unit')
     nearst_expiry_date = serializers.SerializerMethodField()
     details = serializers.SerializerMethodField()
-    
-    def get_details(self,obj):
+
+    def get_details(self, obj):
         """ 
     
         Method to get the serialization of OwnIngredient details
@@ -46,8 +44,8 @@ class OICategoryCountSerializer(serializers.Serializer):
         details = obj.details.all()
         serialized_details = OIDetailSerializer(details, many=True).data
         return serialized_details
-    
-    def get_nearst_expiry_date(self,obj):
+
+    def get_nearst_expiry_date(self, obj):
         """ 
     
         Method to get the nearest expiration date of an ingredient
@@ -59,10 +57,11 @@ class OICategoryCountSerializer(serializers.Serializer):
         The nearst expiration date of an ingredient
 
         """
-        min_expiry_date = obj.details.aggregate(Min('expiry_date'))['expiry_date__min']
+        min_expiry_date = obj.details.aggregate(
+            Min('expiry_date'))['expiry_date__min']
         return min_expiry_date
-    
-    def get_quantity_and_unit(self,obj):
+
+    def get_quantity_and_unit(self, obj):
         """ 
     
         Method to get the total amount and unit of ingredients
@@ -79,17 +78,23 @@ class OICategoryCountSerializer(serializers.Serializer):
         """
         total_quantity_gram = sum(
             UNIT_TRANS_DICT.get(detail.quantity_unit) * detail.quantity
-            for detail in obj.details.all()
-        )
+            for detail in obj.details.all())
 
-        if total_quantity_gram >= 1000:  
-            return {'total_quantity':total_quantity_gram/1000,'total_quantity_unit':'kg'}
+        if total_quantity_gram >= 1000:
+            return {
+                'total_quantity': total_quantity_gram / 1000,
+                'total_quantity_unit': 'kg'
+            }
         else:
-            return {'total_quantity':total_quantity_gram,'total_quantity_unit':'g'}
-    
+            return {
+                'total_quantity': total_quantity_gram,
+                'total_quantity_unit': 'g'
+            }
+
     class Meta:
         model = OwnIngredient
         fields = '__all__'
+
 
 class OIDetailSerializer(serializers.Serializer):
     """
@@ -106,7 +111,7 @@ class OIDetailSerializer(serializers.Serializer):
 
     class Meta:
         model = OwnIngredientDetail
-        fields = '__all__'  
+        fields = '__all__'
 
     def update(self, instance, validated_data):
         """
@@ -124,7 +129,7 @@ class OIDetailSerializer(serializers.Serializer):
         instance.expiry_date = validated_data.get("expiry_date")
         instance.save()
         return instance
-    
+
     def create(self, validated_data):
         """
         Method to create an instance of OwnIngredientDetail model with validated data.
@@ -135,5 +140,6 @@ class OIDetailSerializer(serializers.Serializer):
         return:
         The created instance of the model.
         """
-        detail = OwnIngredientDetail.objects.create(ingredient = self.context['ingredient'],**validated_data)
+        detail = OwnIngredientDetail.objects.create(
+            ingredient=self.context['ingredient'], **validated_data)
         return detail

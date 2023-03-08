@@ -1,5 +1,5 @@
 from .models import OwnIngredient, OwnIngredientDetail
-from rest_framework import viewsets,status
+from rest_framework import viewsets, status
 from .serializers import OICategoryCountSerializer, OIDetailSerializer, OICategorySerializer
 from django.shortcuts import render, redirect
 from rest_framework.views import APIView
@@ -10,6 +10,7 @@ from django.http import Http404
 def ingredientsPage(request):
     return render(request, 'ingredients.html')
 
+
 class OwnIngredientCategoryView(APIView):
     """ 
 
@@ -17,11 +18,11 @@ class OwnIngredientCategoryView(APIView):
 
     HTTP Methods:
     - GET: Retrieves statistics for all OwnIngredient objects.
-    
+
     """
     def get(self, request, *args, **kwargs):
         """  
-        
+
         Handle HTTP GET requests to obtain statistical information of own ingredients
 
         params:
@@ -44,11 +45,11 @@ class OwnIngredientDetailsListView(APIView):
 
     HTTP Methods:
     - GET: Retrieves details for a given OwnIngredient object.
-    
+
     """
     def get(self, request, *args, **kwargs):
         """  
-        
+
         Handle HTTP GET requests to obtain details of own ingredient
 
         params:
@@ -91,8 +92,13 @@ class OwnIngredientDetailView(APIView):
     - POST: Creates a new OwnIngredientDetail object.
     - PUT: Updates a specific OwnIngredientDetail object by detail_id.
     - DELETE: Deletes a specific OwnIngredientDetail object by detail_id.
-    
+
     """
+    def get_object(self, detail_id):
+        try:
+            return OwnIngredientDetail.objects.get(detail_id=detail_id)
+        except OwnIngredientDetail.DoesNotExist:
+            raise Http404
 
     def get(self, request, *args, **kwargs):
         """
@@ -108,19 +114,13 @@ class OwnIngredientDetailView(APIView):
 
         # Retrieves the detail_id from the keyword arguments passed to the function
         detail_id = kwargs.get("detail_id")
-
-        try:
-            # Tries to retrieve the OwnIngredientDetail object with the corresponding detail_id
-            detail = OwnIngredientDetail.objects.get(detail_id=detail_id)
-
-        except OwnIngredientDetail.DoesNotExist:
-            # Raises an Http404 error if no matching object is found
-            raise Http404
+        # Get the OwnIngredientDetail object with the specified detail_id
+        detail = self.get_object(detail_id)
 
         # Serializes the retrieved object and converts it to JSON
-        json = OIDetailSerializer(detail)
+        json_data = OIDetailSerializer(detail).data
         # Returns the JSON data in a Response object
-        return Response(json.data)
+        return Response(json_data)
 
     def put(self, request, *args, **kwargs):
         """
@@ -138,22 +138,18 @@ class OwnIngredientDetailView(APIView):
         data = request.data
         # Retrieves the `detail_id` from the URL parameters
         detail_id = kwargs.get("detail_id")
+        # Get the OwnIngredientDetail object with the specified detail_id
+        detail = self.get_object(detail_id)
 
-        try:
-            # Tries to get the specified detail object from the model database
-            detail = OwnIngredientDetail.objects.get(detail_id=detail_id)
-        except OwnIngredientDetail.DoesNotExist:
-            # Raises an Http404 response if the detail is not found
-            raise Http404
-
-        # Serializes the retrieved detail object with the update data and checks if the serialization is valid  
+        # Serializes the retrieved detail object with the update data and checks if the serialization is valid
         ser_data = OIDetailSerializer(detail, data=data)
         if ser_data.is_valid():
             detail = ser_data.save()
             return Response(ser_data.data)
         else:
             # If the serialization isn't valid, returns an error message with an error status code
-            return Response(ser_data.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(ser_data.errors,
+                            status=status.HTTP_400_BAD_REQUEST)
 
     def post(self, request, *args, **kwargs):
         """
@@ -178,19 +174,19 @@ class OwnIngredientDetailView(APIView):
             ingredient = OwnIngredient.objects.create(name=name)
 
         # Serializes the data using OIDetailSerializer to create a new OwnIngredientDetail instance and defines the "ingredient" field
-        ser_data = OIDetailSerializer(
-            data=data, context={'ingredient': ingredient})
+        ser_data = OIDetailSerializer(data=data,
+                                      context={'ingredient': ingredient})
 
         if ser_data.is_valid():
             # Saves the serialized data as a new OwnIngredientDetail object
             ser_data.save()
-            # Returns the response containing the serialized data in JSON format 
+            # Returns the response containing the serialized data in JSON format
             return Response(ser_data.data)
         else:
             # Deletes any created ingredient due to validation failure and prints the error message
             ingredient.delete()
             print(ser_data.error_messages)
-            # Returns with Http status 400 cause invalid data input detected 
+            # Returns with Http status 400 cause invalid data input detected
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, *args, **kwargs):
@@ -204,25 +200,18 @@ class OwnIngredientDetailView(APIView):
         Returns:
         - Response: HTTP 204 NO CONTENT if the ingredient has no more details, otherwise HTTP 202 ACCEPTED.
         """
-        
+
         # Retrieve the detail_id from the keyword arguments
         detail_id = kwargs.get("detail_id")
-        try:
-            # Get the OwnIngredientDetail object with the specified detail_id
-            detail = OwnIngredientDetail.objects.get(detail_id=detail_id)
-            # Get the corresponding ingredient and delete the detail
-            ingredient = detail.ingredient
-            detail.delete()
-
-            # Check if there are any remaining details for this ingredient
-            details = OwnIngredientDetail.objects.filter(ingredient=ingredient)
-            if not details.exists():
-                # If there are no more details, delete the ingredient and return HTTP 204
-                ingredient.delete()
-                return Response(status=status.HTTP_204_NO_CONTENT)
-            # If there are still other details, return HTTP 202
-            return Response(status=status.HTTP_202_ACCEPTED)
-        except OwnIngredientDetail.DoesNotExist:
-            # If the requested detail_id does not exist, return HTTP 404
-            return Response(status=status.HTTP_404_NOT_FOUND)
-
+        # Get the OwnIngredientDetail object with the specified detail_id
+        detail = self.get_object(detail_id)
+        # Get the corresponding ingredient and delete the detail
+        ingredient = detail.ingredient
+        detail.delete()
+        # Check if there are any remaining details for this ingredient
+        details = OwnIngredientDetail.objects.filter(ingredient=ingredient)
+        if not details.exists():
+            # If there are no more details, delete the ingredient
+            ingredient.delete()
+        # If there are still other details, return HTTP 202
+        return Response(status=status.HTTP_200_OK)
