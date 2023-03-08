@@ -11,9 +11,6 @@ class OwnIngredient(models.Model):
     # name of the ingredient, maximum length 64 characters, must be unique
     name = models.CharField(max_length=64, unique=True)
 
-    def __str__(self):
-        return 'OwnIngredient'
-
 
 class OwnIngredientDetail(models.Model):
     """
@@ -35,6 +32,3 @@ class OwnIngredientDetail(models.Model):
     quantity_unit = models.CharField(max_length=16)
     # expiry date for the ingredient, stored as a date field
     expiry_date = models.DateField()
-
-    def __str__(self):
-        return "OwnIngredientDetail"
