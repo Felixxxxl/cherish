@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import OwnIngredient, OwnIngredientDetail
 from datetime import datetime
+from django.db.models import Min
 
 # A dictionary that maps units to their corresponding gram weight
 UNIT_TRANS_DICT = {
@@ -15,9 +16,6 @@ class OICategorySerializer(serializers.Serializer):
     Serializer class to represent the OwnIngredient model instance.
 
     """
-    ingredient_id = serializers.IntegerField()
-    name = serializers.CharField()
-
     class Meta:
         model = OwnIngredient
         fields = '__all__'
@@ -61,9 +59,8 @@ class OICategoryCountSerializer(serializers.Serializer):
         The nearst expiration date of an ingredient
 
         """
-        date_objs = [detail.expiry_date for detail in obj.details.all()]
-        date_objs.sort()
-        return date_objs[0]
+        min_expiry_date = obj.details.aggregate(Min('expiry_date'))['expiry_date__min']
+        return min_expiry_date
     
     def get_quantity_and_unit(self,obj):
         """ 
@@ -80,13 +77,12 @@ class OICategoryCountSerializer(serializers.Serializer):
             }
 
         """
-        total_quantity_gram = 0
-        for detail in obj.details.all():
-            quantity = UNIT_TRANS_DICT.get(detail.quantity_unit) * detail.quantity
-            total_quantity_gram += quantity
+        total_quantity_gram = sum(
+            UNIT_TRANS_DICT.get(detail.quantity_unit) * detail.quantity
+            for detail in obj.details.all()
+        )
 
-        if total_quantity_gram >= 1000:
-            
+        if total_quantity_gram >= 1000:  
             return {'total_quantity':total_quantity_gram/1000,'total_quantity_unit':'kg'}
         else:
             return {'total_quantity':total_quantity_gram,'total_quantity_unit':'g'}
@@ -116,6 +112,12 @@ class OIDetailSerializer(serializers.Serializer):
         """
         Method to update the instance of OwnIngredientDetail model with validated data.
 
+        params:
+        instance: The object to be updated
+        validated_data: The validated data.
+
+        return:
+        The updated instance of the model.
         """
         instance.quantity = validated_data.get("quantity")
         instance.quantity_unit = validated_data.get("quantity_unit")
@@ -126,7 +128,12 @@ class OIDetailSerializer(serializers.Serializer):
     def create(self, validated_data):
         """
         Method to create an instance of OwnIngredientDetail model with validated data.
-        
+
+        params:
+        validated_data: The validated data.
+
+        return:
+        The created instance of the model.
         """
         detail = OwnIngredientDetail.objects.create(ingredient = self.context['ingredient'],**validated_data)
         return detail
