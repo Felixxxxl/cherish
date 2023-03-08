@@ -2,6 +2,7 @@ from rest_framework import serializers
 from .models import OwnIngredient, OwnIngredientDetail
 from datetime import datetime
 
+# A dictionary that maps units to their corresponding gram weight
 UNIT_TRANS_DICT = {
     'g': 1,
     'kg':1000,
@@ -10,6 +11,10 @@ UNIT_TRANS_DICT = {
 }
 
 class OICategorySerializer(serializers.Serializer):
+    """
+    Serializer class to represent the OwnIngredient model instance.
+
+    """
     ingredient_id = serializers.IntegerField()
     name = serializers.CharField()
 
@@ -19,8 +24,8 @@ class OICategorySerializer(serializers.Serializer):
 
 class OICategoryCountSerializer(serializers.Serializer):
     """ 
-    
-    Own ingredient type information serializer class.
+    Serializer class to represent the information of each OwnIngredient.
+
     """
     ingredient_id = serializers.IntegerField()
     name = serializers.CharField()
@@ -31,7 +36,7 @@ class OICategoryCountSerializer(serializers.Serializer):
     def get_details(self,obj):
         """ 
     
-        Get the serialization of OwnIngredient details
+        Method to get the serialization of OwnIngredient details
 
         params:
         obj: OwnIngredient object
@@ -47,7 +52,7 @@ class OICategoryCountSerializer(serializers.Serializer):
     def get_nearst_expiry_date(self,obj):
         """ 
     
-        Get the nearst expiration date of an ingredient
+        Method to get the nearest expiration date of an ingredient
 
         params:
         obj: OwnIngredient object
@@ -63,7 +68,7 @@ class OICategoryCountSerializer(serializers.Serializer):
     def get_quantity_and_unit(self,obj):
         """ 
     
-        Get the total amount and unit of ingredients
+        Method to get the total amount and unit of ingredients
 
         params:
         obj: OwnIngredient object
@@ -87,16 +92,12 @@ class OICategoryCountSerializer(serializers.Serializer):
             return {'total_quantity':total_quantity_gram,'total_quantity_unit':'g'}
     
     class Meta:
-        """
-         Own ingredient type information serializer metaclass.
-
-        """
         model = OwnIngredient
         fields = '__all__'
 
 class OIDetailSerializer(serializers.Serializer):
     """
-    Own ingredient detail serializer class.
+    Serializer class to represent the OwnIngredientDetail model instance.
 
     """
     # define fields for serialization and deserialization
@@ -113,7 +114,7 @@ class OIDetailSerializer(serializers.Serializer):
 
     def update(self, instance, validated_data):
         """
-        Update the instance of OwnIngredientDetail model with validated data.
+        Method to update the instance of OwnIngredientDetail model with validated data.
 
         """
         instance.quantity = validated_data.get("quantity")
@@ -124,7 +125,7 @@ class OIDetailSerializer(serializers.Serializer):
     
     def create(self, validated_data):
         """
-        Create an instance of OwnIngredientDetail model with validated data.
+        Method to create an instance of OwnIngredientDetail model with validated data.
         
         """
         detail = OwnIngredientDetail.objects.create(ingredient = self.context['ingredient'],**validated_data)
