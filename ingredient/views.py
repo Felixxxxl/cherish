@@ -37,8 +37,8 @@ class OwnIngredientCategoryView(APIView):
         # Fetch all own ingredients categories from the DB
         category = OwnIngredient.objects.all()
         # Use the serializer to calculate and convert the queryset of your own ingredients into JSON format
-        json = OICategoryCountSerializer(category, many=True)
-        return Response(json.data)
+        json_data = OICategoryCountSerializer(category, many=True).data
+        return Response(json_data)
 
 
 class OwnIngredientDetailsListView(APIView):
@@ -147,7 +147,7 @@ class OwnIngredientDetailView(APIView):
         ser_data = OIDetailSerializer(detail, data=data)
         if ser_data.is_valid():
             detail = ser_data.save()
-            return Response(ser_data.data)
+            return Response(ser_data.data,status=status.HTTP_200_OK)
         else:
             # If the serialization isn't valid, returns an error message with an error status code
             return Response(ser_data.errors,
@@ -183,7 +183,7 @@ class OwnIngredientDetailView(APIView):
             # Saves the serialized data as a new OwnIngredientDetail object
             ser_data.save()
             # Returns the response containing the serialized data in JSON format
-            return Response(ser_data.data)
+            return Response(ser_data.data,status=status.HTTP_201_CREATED)
         else:
             # Deletes any created ingredient due to validation failure and prints the error message
             ingredient.delete()
@@ -219,4 +219,4 @@ class OwnIngredientDetailView(APIView):
             # If there are no more details, delete the ingredient
             ingredient.delete()
         # If there are still other details, return HTTP 202
-        return Response(data={"success": True})
+        return Response(data={"success": True},status=status.HTTP_200_OK)

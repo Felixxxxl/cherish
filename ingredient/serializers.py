@@ -11,6 +11,8 @@ class OICategorySerializer(serializers.Serializer):
     Serializer class to represent the OwnIngredient model instance.
 
     """
+    ingredient_id = serializers.IntegerField()
+    name = serializers.CharField()
     class Meta:
         model = OwnIngredient
         fields = '__all__'
