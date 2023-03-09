@@ -23,86 +23,81 @@ class ModelsTestCase(TestCase):
 
     def test_own_ingredient_creation(self):
         """Test that an OwnIngredient can be created"""
+        ingredient_count_before = OwnIngredient.objects.count()
         ingredient = OwnIngredient.objects.create(name="new ingredient")
+        ingredient_count_after = OwnIngredient.objects.count()
+
+        self.assertEqual(ingredient_count_after, ingredient_count_before + 1)
         self.assertEqual(ingredient.name, "new ingredient")
 
     def test_own_ingredient_detail_creation(self):
         """Test that an OwnIngredientDetail can be created"""
+        detail_count_before = OwnIngredientDetail.objects.count()
         detail = OwnIngredientDetail.objects.create(
             ingredient=self.ingredient,
             quantity=2,
             quantity_unit="g",
             expiry_date="2022-06-30"
         )
+        detail_count_after = OwnIngredientDetail.objects.count()
+
+        self.assertEqual(detail_count_after, detail_count_before + 1)
         self.assertEqual(detail.quantity, 2)
         self.assertEqual(detail.expiry_date, "2022-06-30")
 
     def test_own_ingredient_details_relation(self):
         """Test the reverse relation from OwnIngredient to its details"""
         details = self.ingredient.details.all()
-        self.assertEqual(len(details), 1)
+
+        self.assertEqual(details.count(), 1)
         self.assertEqual(details[0].quantity, 1)
 
 
 class SerializersTestCases(TestCase):
 
     def setUp(self):
-
         self.own_ingredient = OwnIngredient.objects.create(name='Green pepper')
 
-    def test_own_ingredient_creation(self):
-
-        self.assertTrue(isinstance(self.own_ingredient, OwnIngredient))
-
-    def test_own_ingredient_detail_creation(self):
-
-        expiry_date = date.today()
-        oi_detail1 = OwnIngredientDetail.objects.create(
+        self.oi_detail1 = OwnIngredientDetail.objects.create(
             ingredient=self.own_ingredient,
             quantity=2,
             quantity_unit='g',
-            expiry_date=expiry_date
+            expiry_date=date.today(),
         )
-        self.assertTrue(isinstance(oi_detail1, OwnIngredientDetail))
 
-
-        oi_detail2 = OwnIngredientDetail.objects.create(
+        self.oi_detail2 = OwnIngredientDetail.objects.create(
             ingredient=self.own_ingredient,
             quantity=5,
             quantity_unit='oz',
-            expiry_date=expiry_date
+            expiry_date=date.today(),
         )
 
-        oicountserializer = OICategoryCountSerializer(self.own_ingredient)
-        data = oicountserializer.data
-        self.assertEqual(data['ingredient_id'],
-                         self.own_ingredient.ingredient_id)
+    def test_own_ingredient_creation(self):
+        self.assertTrue(isinstance(self.own_ingredient, OwnIngredient))
+
+    def test_own_ingredient_detail_creation(self):
+        serializer = OICategoryCountSerializer(self.own_ingredient)
+        data = serializer.data
+
+        self.assertEqual(data['ingredient_id'], self.own_ingredient.ingredient_id)
         self.assertEqual(data['name'], self.own_ingredient.name)
+
         # total_quantity = (2*1 + 5*28.35)
-        self.assertEqual(data['quantity_and_unit']['total_quantity'], 143.75)
-        self.assertEqual(data['nearst_expiry_date'], expiry_date)
-        self.assertDictEqual(data['details'][0],
-                             OIDetailSerializer(oi_detail1).data)
-        self.assertDictEqual(data['details'][1],
-                             OIDetailSerializer(oi_detail2).data)
+        self.assertAlmostEqual(data['quantity_and_unit']['total_quantity'], 143.75, delta=0.01)
+        
+        self.assertEqual(data['nearst_expiry_date'], date.today())
+        self.assertDictEqual(data['details'][0], OIDetailSerializer(self.oi_detail1).data)
+        self.assertDictEqual(data['details'][1], OIDetailSerializer(self.oi_detail2).data)
 
     def test_oidetail_serializer(self):
- 
-        expiry_date = date.today()
-        oi_detail = OwnIngredientDetail.objects.create(
-            ingredient=self.own_ingredient,
-            quantity=2,
-            quantity_unit='g',
-            expiry_date=expiry_date
-        )
+        serializer = OIDetailSerializer(self.oi_detail1)
+        data = serializer.data
 
-        oidetailserializer = OIDetailSerializer(oi_detail)
-        data = oidetailserializer.data
-        self.assertEqual(data['detail_id'], oi_detail.detail_id)
-        self.assertEqual(data['ingredient']['name'], oi_detail.ingredient.name)
-        self.assertEqual(data['quantity'], oi_detail.quantity)
-        self.assertEqual(data['quantity_unit'], oi_detail.quantity_unit)
-        self.assertEqual(data['expiry_date'], str(oi_detail.expiry_date))
+        self.assertEqual(data['detail_id'], self.oi_detail1.detail_id)
+        self.assertEqual(data['ingredient']['name'], self.oi_detail1.ingredient.name)
+        self.assertEqual(data['quantity'], self.oi_detail1.quantity)
+        self.assertEqual(data['quantity_unit'], self.oi_detail1.quantity_unit)
+        self.assertEqual(data['expiry_date'], str(self.oi_detail1.expiry_date))
 
 
 class TestIngredientsPage(TestCase):
@@ -111,8 +106,6 @@ class TestIngredientsPage(TestCase):
         client = Client()
         response = client.get('/ingredient/')
         self.assertEqual(response.status_code, 200)
-
-# Test case to get statistics about own ingredients categories (if any)
 
 
 class TestOwnIngredientCategoryView(TestCase):
@@ -201,21 +194,17 @@ class TestOwnIngredientCategoryView(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(actual_output, expected_output)
 
-    def tearDown(self):
-        OwnIngredient.objects.all().delete()
-        OwnIngredientDetail.objects.all().delete()
-
 
 class OwnIngredientDetailsListViewTestCase(TestCase):
     def setUp(self):
         self.client = APIClient()
-        self.expiry_date = date.today()
+        self.expiry_date = date.today() + timedelta(days=10)
         self.oi = OwnIngredient.objects.create(name='Milk')
         self.oi_detail = OwnIngredientDetail.objects.create(
             ingredient=self.oi,
             quantity=2,
             quantity_unit='g',
-            expiry_date=self.expiry_date + timedelta(days=10)
+            expiry_date=self.expiry_date
         )
 
     def test_get_with_valid_ingredient_detail(self):
@@ -230,7 +219,7 @@ class OwnIngredientDetailsListViewTestCase(TestCase):
                 },
                 'quantity': 2,
                 'quantity_unit': 'g',
-                'expiry_date': str(self.expiry_date + timedelta(days=10)),
+                'expiry_date': str(self.expiry_date),
             }
         ]
         self.assertEqual(response.status_code, status.HTTP_200_OK)
