@@ -17,25 +17,26 @@ class ExpiredProcessHnadler:
 
     def __call__(self,request):
         response = self.get_response(request)
-
+        
+        # Filter all the ingredient items whose expiration is over today's date.
         expired_records = OwnIngredientDetail.objects.filter(expiry_date__lt=date.today())
+        with transaction.atomic():
+            for record in expired_records:
+                    # Create ingredient status logs for every expired record before deleting
+                    log_record = IngredientStatusLog.objects.create(
+                        ingredient_name=record.ingredient.name,
+                        quantity=record.quantity * UNIT_TRANS_DICT[record.quantity_unit],
+                        date=record.expiry_date)
 
-        for record in expired_records:
-                log_record = IngredientStatusLog.objects.create(
-                    ingredient_name=record.ingredient.name,
-                    quantity=record.quantity * UNIT_TRANS_DICT[record.quantity_unit],
-                    date=record.expiry_date)
-
-                details = OwnIngredientDetail.objects.filter(ingredient__name = record.ingredient.name)
-                print(record.ingredient.name)
-
-                record.delete()
+                    # Check if there are other details for this ingredient
+                    details = OwnIngredientDetail.objects.filter(ingredient__name = record.ingredient.name)
+                     # Delete the expired detail record after logging data
+                    record.delete()
+                    
+                    # If there are no more details for this ingredient, remove the whole ingredient category too
+                    if not details.exists():
+                        category = OwnIngredient.objects.get(name = record.ingredient.name)
+                        category.delete()
                 
-                if not details.exists():
-                    category = OwnIngredient.objects.get(name = record.ingredient.name)
-                    category.delete()
-                
-                
-
         return response
 
