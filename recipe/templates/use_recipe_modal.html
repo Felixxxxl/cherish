@@ -114,13 +114,14 @@
             var UseModal = document.getElementById("UseModal")
 
             var recipe_id = UseModal.querySelector('#recipe-id').value
-
             $.ajax({
-                url: '/api/recipe/recipecheck/' + recipe_id,
+                url: '/api/recipe/recipeuse/',
                 type: 'PUT',
                 data: JSON.stringify({
-                    'recipe_id': recipe_id
-                    }),
+                    'recipe_id': recipe_id,
+                }),
+                contentType: "application/json",
+                dataType: 'json',
                 success: function (response) {
                     $("#success-modal").modal("show")
                     setTimeout(function () {
