@@ -1,6 +1,4 @@
 from django.db import models
-from ingredient.models import OwnIngredient
-
 
 # Create your models here.
 class IngredientStatusLog(models.Model):

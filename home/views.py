@@ -2,12 +2,12 @@ from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from datetime import date, timedelta
+from datetime import date
+from django.db.models import F, FloatField, Case, When, IntegerField, ExpressionWrapper, Avg, Sum, Value, Q
 from ingredient.models import OwnIngredientDetail, OwnIngredient
 from recipe.models import RecipeDetail, Recipe
 from recipe.serializer import RecipeSerializer
-from django.db.models import F, Func, FloatField, Case, When, IntegerField, ExpressionWrapper, Avg, Sum, Value, Q
-from django.db.models.functions import Exp, Cast, Abs, Power
+from django.db.models.functions import Exp
 from .models import IngredientStatusLog
 from .serializers import IngredientStatusLogSerializer
 # Create your views here.
@@ -20,11 +20,17 @@ UNIT_TRANS_DICT = {
 }
 
 
-def homePage(request):
+def homepage(request):
+    """ 
+    This function is used to render the home page
+    """
     return render(request, 'home.html')
 
 
-def logPage(request):
+def logpage(request):
+    """ 
+    This function is used to render the log page
+    """
     return render(request, 'log.html')
 
 # Create a RecommedRecipesView that inherits APIView to handle HTTP GET request.
@@ -100,11 +106,11 @@ class RecommendRecipesView(APIView):
 
                 try:
                     OwnIngredient.objects.get(name=detail.ingredient.name)
-                except:
+                except OwnIngredient.DoesNotExist:
                     ingredients_enough = False
                     break
 
-            if ingredients_enough == True:
+            if ingredients_enough:
                 recipes_list.append(recipe)
 
         recipe_details = RecipeDetail.objects.filter(recipe__in=recipes_list)

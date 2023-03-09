@@ -1,12 +1,15 @@
-from .models import OwnIngredient, OwnIngredientDetail
-from rest_framework import viewsets, status
-from .serializers import OICategoryCountSerializer, OIDetailSerializer, OICategorySerializer
-from django.shortcuts import render, redirect
+from rest_framework import status
+from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from .models import OwnIngredient, OwnIngredientDetail
+from .serializers import OICategoryCountSerializer, OIDetailSerializer
 
 
-def ingredientsPage(request):
+def ingredientspage(request):
+    """ 
+    This function is used to render the ingredients page
+    """
     return render(request, 'ingredients.html')
 
 

@@ -22,11 +22,11 @@ from recipe import views as recipeView
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path('home/',homeView.homePage,name='home'),
+    path('home/',homeView.homepage,name='home'),
     path('', RedirectView.as_view(url='home/',permanent = True)),
-    path('ingredient/',ingredientView.ingredientsPage,name='ingredient'),
-    path('recipe/',recipeView.recipePage,name='recipe'),
-    path('log/',homeView.logPage,name='log'),
+    path('ingredient/',ingredientView.ingredientspage,name='ingredient'),
+    path('recipe/',recipeView.recipepage,name='recipe'),
+    path('log/',homeView.logpage,name='log'),
 
     path('api/oi/getcategorylist/',ingredientView.OwnIngredientCategoryView.as_view()),
     path('api/oi/getdetailslist/<ingredient_id>',ingredientView.OwnIngredientDetailsListView.as_view()),

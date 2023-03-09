@@ -1,20 +1,28 @@
+import json
 from django.shortcuts import render
 from rest_framework.views import APIView
-from .models import Recipe, RecipeDetail, RecipeIngredient
-from .serializer import RecipeSerializer, IngredientSerializers, RecipeDetailSerializer, RecipeDetailsListSerializer
+
+
 from rest_framework.response import Response
 from rest_framework import status
-import json
+
 from django.db import transaction
-from ingredient.models import OwnIngredient, OwnIngredientDetail
+
+from django.db.models import F, Case, When, CharField
 from ingredient.serializers import OICategoryCountSerializer
-from django.db.models import F, Case, When, Value, CharField
+from ingredient.models import OwnIngredient, OwnIngredientDetail
+from .serializer import RecipeSerializer, IngredientSerializers, RecipeDetailSerializer, RecipeDetailsListSerializer
+from .models import Recipe, RecipeDetail, RecipeIngredient
+
 
 # Create your views here.
 UNIT_TRANS_DICT = {'g': 1, 'kg': 1000, 'oz': 28.35, 'lbs': 453.59}
 
 
-def recipePage(request):
+def recipepage(request):
+    """ 
+    This function is used to render the recipe page
+    """
     return render(request, 'recipe.html')
 
 
@@ -325,7 +333,6 @@ class RecipeDetailsListView(APIView):
                     unit=unit)
             except Exception as e:
                 # Rollback the transaction in case of error and return a not found response
-                print(e)
                 transaction.savepoint_rollback(save_id)
                 return Response(status=status.HTTP_404_NOT_FOUND)
         # Return a success response
