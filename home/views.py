@@ -6,7 +6,7 @@ from datetime import date
 from django.db.models import F, FloatField, Case, When, IntegerField, ExpressionWrapper, Avg, Sum, Value, Q
 from ingredient.models import OwnIngredientDetail, OwnIngredient
 from recipe.models import RecipeDetail, Recipe
-from recipe.serializer import RecipeSerializer
+from recipe.serializers import RecipeSerializer
 from django.db.models.functions import Exp
 from .models import IngredientStatusLog
 from .serializers import IngredientStatusLogSerializer
@@ -59,12 +59,13 @@ class RecommendRecipesView(APIView):
         quantity_k = 0.3
         expiry_date_k = 0.7
 
-        # Convert the quality of the ingredients in the existing ingredients to gram
+        # Convert the quality of the ingredients in the existing ingredients to kilogram
         all_details = OwnIngredientDetail.objects.annotate(
             normalized_quantity=Case(
-                When(quantity_unit='kg', then=F('quantity') * 1000),
-                When(quantity_unit='lbs', then=F('quantity') * 453.59),
-                When(quantity_unit='oz', then=F('quantity') * 28.35),
+                When(quantity_unit='g', then=F('quantity') / 1000),
+                When(quantity_unit='kg', then=F('quantity') * 1000 / 1000),
+                When(quantity_unit='lbs', then=F('quantity') * 453.59 / 1000),
+                When(quantity_unit='oz', then=F('quantity') * 28.35 / 1000),
                 default=F('quantity'),
                 output_field=FloatField()
             )
@@ -121,9 +122,10 @@ class RecommendRecipesView(APIView):
         ).annotate(
             # The quality in the recipes is converted to gram
             normalized_quantity=Case(
-                When(unit='kg', then=F('quantity') * 1000),
-                When(unit='lbs', then=F('quantity') * 453.59),
-                When(unit='oz', then=F('quantity') * 28.35),
+                When(unit='g', then=F('quantity') / 1000),
+                When(unit='kg', then=F('quantity') * 1000 / 1000),
+                When(unit='lbs', then=F('quantity') * 453.59 / 1000),
+                When(unit='oz', then=F('quantity') * 28.35 / 1000),
                 default=F('quantity'),
                 output_field=FloatField()
             ),
