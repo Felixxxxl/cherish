@@ -13,6 +13,7 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+from rest_framework.documentation import include_docs_urls
 from django.contrib import admin
 from django.urls import path
 from django.views.generic import RedirectView
@@ -46,5 +47,7 @@ urlpatterns = [
     path('api/home/recommended/',homeView.RecommendRecipesView.as_view()),
     path('api/home/wastelog/',homeView.WastingLogView.as_view()),
     path('api/home/wastelogchart/',homeView.WastingLogChartView.as_view()),
+
+    path('docs/', include_docs_urls(title='API docs')),
 
 ]
