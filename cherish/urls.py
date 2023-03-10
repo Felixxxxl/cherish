@@ -39,7 +39,9 @@ urlpatterns = [
     path('api/recipe/getrecipedetails/<recipe_id>',recipeView.RecipeDetailsListView.as_view()),
     path('api/recipe/getrecipeinfo/<recipe_id>',recipeView.RecipeInfoView.as_view()),
     path('api/recipe/recipedetails/',recipeView.RecipeDetailsListView.as_view()),
+
     path('api/recipe/recipecheck/<recipe_id>',recipeView.RecipeDetailCheckView.as_view()),
+    path('api/recipe/recipeuse/',recipeView.RecipeDetailCheckView.as_view()),
 
     path('api/home/recommended/',homeView.RecommendRecipesView.as_view()),
     path('api/home/wastelog/',homeView.WastingLogView.as_view()),

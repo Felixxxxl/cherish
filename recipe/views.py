@@ -11,7 +11,7 @@ from django.db import transaction
 from django.db.models import F, Case, When, CharField
 from ingredient.serializers import OICategoryCountSerializer
 from ingredient.models import OwnIngredient, OwnIngredientDetail
-from .serializer import RecipeSerializer, IngredientSerializers, RecipeDetailSerializer, RecipeDetailsListSerializer
+from .serializers import RecipeSerializer, IngredientSerializers, RecipeDetailSerializer, RecipeDetailsListSerializer
 from .models import Recipe, RecipeDetail, RecipeIngredient
 
 
@@ -105,7 +105,7 @@ class RecipeDetailView(APIView):
         except RecipeDetail.DoesNotExist:
             return Response(status = status.HTTP_404_NOT_FOUND)
         json_data = RecipeDetailSerializer(detail).data
-        return Response(json_data)
+        return Response(json_data,status=status.HTTP_200_OK)
 
 
 class RecipeInfoView(APIView):
@@ -136,7 +136,7 @@ class RecipeInfoView(APIView):
             return Response(status=status.HTTP_404_NOT_FOUND)
 
         json_data = RecipeDetailsListSerializer(recipe).data
-        return Response(json_data)
+        return Response(json_data,status=status.HTTP_200_OK)
 
     def delete(self, request, *args, **kwargs):
         """
@@ -156,7 +156,7 @@ class RecipeInfoView(APIView):
         details = RecipeDetail.objects.filter(recipe=recipe)
         details.delete()
         recipe.delete()
-        return Response(data={"success": True})
+        return Response(data={"success": True},status=status.HTTP_200_OK)
 
 
 class RecipeDetailsListView(APIView):
@@ -189,7 +189,7 @@ class RecipeDetailsListView(APIView):
         if not details.exists():
             return Response(status = status.HTTP_404_NOT_FOUND)
         json_data = RecipeDetailSerializer(details, many=True).data
-        return Response(json_data)
+        return Response(json_data,status=status.HTTP_200_OK)
 
     @transaction.atomic
     def put(self, request, *args, **kwargs):
@@ -284,7 +284,7 @@ class RecipeDetailsListView(APIView):
                     continue
                 detail.delete()            
         #return Http response with success message
-        return Response(data={'success': True})
+        return Response(data={'success': True},status=status.HTTP_200_OK)
 
     @transaction.atomic
     def post(self, request, *args, **kwargs):
@@ -336,7 +336,7 @@ class RecipeDetailsListView(APIView):
                 transaction.savepoint_rollback(save_id)
                 return Response(status=status.HTTP_404_NOT_FOUND)
         # Return a success response
-        return Response(data={'success': True})
+        return Response(data={'success': True},status=status.HTTP_200_OK)
 
 
 class RecipeDetailCheckView(APIView):
@@ -434,7 +434,7 @@ class RecipeDetailCheckView(APIView):
             response['details'].append(detail_dict)
 
         # Return response as JSON object
-        return Response(data=response)
+        return Response(data=response,status=status.HTTP_200_OK)
 
     @transaction.atomic
     def put(self, request, *args, **kwargs):
@@ -445,12 +445,12 @@ class RecipeDetailCheckView(APIView):
             :return: returns the status after completing the operation
             
         """
+        # retrieves the recipe id from the request data
+        recipe_id = request.data.get('recipe_id')
         # creates a savepoint in case anything goes wrong during the transaction
         save_id = transaction.savepoint()
-        # loads the request body as JSON data
-        data = json.loads(request.body)
-        # retrieves the recipe id from the request data
-        recipe_id = data.get('recipe_id')
+        
+        print(recipe_id)
 
         try:
             # retrieves the recipe object from the database using its ID
@@ -517,4 +517,4 @@ class RecipeDetailCheckView(APIView):
                 transaction.savepoint_rollback(save_id)
                 return Response(status = status.HTTP_404_NOT_FOUND)
         # if everything goes well, commits the transaction and returns a success message
-        return Response(data={"success":True})
+        return Response(data={"success":True},status=status.HTTP_200_OK)

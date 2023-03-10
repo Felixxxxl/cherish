@@ -6,7 +6,7 @@ from datetime import date
 from django.db.models import F, FloatField, Case, When, IntegerField, ExpressionWrapper, Avg, Sum, Value, Q
 from ingredient.models import OwnIngredientDetail, OwnIngredient
 from recipe.models import RecipeDetail, Recipe
-from recipe.serializer import RecipeSerializer
+from recipe.serializers import RecipeSerializer
 from django.db.models.functions import Exp
 from .models import IngredientStatusLog
 from .serializers import IngredientStatusLogSerializer
@@ -59,12 +59,13 @@ class RecommendRecipesView(APIView):
         quantity_k = 0.3
         expiry_date_k = 0.7
 
-        # Convert the quality of the ingredients in the existing ingredients to gram
+        # Convert the quality of the ingredients in the existing ingredients to kilogram
         all_details = OwnIngredientDetail.objects.annotate(
             normalized_quantity=Case(
-                When(quantity_unit='kg', then=F('quantity') * 1000),
-                When(quantity_unit='lbs', then=F('quantity') * 453.59),
-                When(quantity_unit='oz', then=F('quantity') * 28.35),
+                When(quantity_unit='g', then=F('quantity') / 1000),
+                When(quantity_unit='kg', then=F('quantity') * 1000 / 1000),
+                When(quantity_unit='lbs', then=F('quantity') * 453.59 / 1000),
+                When(quantity_unit='oz', then=F('quantity') * 28.35 / 1000),
                 default=F('quantity'),
                 output_field=FloatField()
             )
@@ -121,9 +122,10 @@ class RecommendRecipesView(APIView):
         ).annotate(
             # The quality in the recipes is converted to gram
             normalized_quantity=Case(
-                When(unit='kg', then=F('quantity') * 1000),
-                When(unit='lbs', then=F('quantity') * 453.59),
-                When(unit='oz', then=F('quantity') * 28.35),
+                When(unit='g', then=F('quantity') / 1000),
+                When(unit='kg', then=F('quantity') * 1000 / 1000),
+                When(unit='lbs', then=F('quantity') * 453.59 / 1000),
+                When(unit='oz', then=F('quantity') * 28.35 / 1000),
                 default=F('quantity'),
                 output_field=FloatField()
             ),
@@ -157,10 +159,14 @@ class RecommendRecipesView(APIView):
 
         # Add the recipe id just filtered to the array
         recipe_list = list(fscore.values_list('recipe__recipe_id', flat=True))
-
-        recipes = Recipe.objects.filter(recipe_id__in=recipe_list)
-        json = RecipeSerializer(recipes, many=True)
-        return Response(json.data)
+        # Create collations using Case/When statements
+        order = Case(
+            *[When(recipe_id = recipe_id,then = pos) for pos, recipe_id in enumerate(recipe_list)],
+            output_field=IntegerField()
+        )
+        recipes = Recipe.objects.filter(recipe_id__in=recipe_list).order_by(order)
+        json_data = RecipeSerializer(recipes, many=True).data
+        return Response(json_data,status=status.HTTP_200_OK)
 
 
 # Create a WastingLogView that inherits APIView to handle HTTP GET request.
@@ -194,7 +200,7 @@ class WastingLogView(APIView):
         serializer = IngredientStatusLogSerializer(logs, many=True)
 
         # Return the serialized data as a response with status 200 (OK).
-        return Response(serializer.data)
+        return Response(serializer.data,status=status.HTTP_200_OK)
 
 # The following class obtain a list of IngredientStatusLog objects
 
@@ -234,4 +240,4 @@ class WastingLogChartView(APIView):
         labels, data = zip(*name_quantity_tuples)
 
         # Return HTTP response with 'data' and 'labels' fields containing quantity and ingedients names.
-        return Response({"label": labels, "data": data})
+        return Response({"label": labels, "data": data},status=status.HTTP_200_OK)
