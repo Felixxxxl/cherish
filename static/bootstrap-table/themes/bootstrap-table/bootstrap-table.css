@@ -497,7 +497,7 @@ div.fixed-table-scroll-outer {
 }
 
 .bootstrap-table .btn.active {
-  background-color: #ebebeb;
+  /* background-color: #ebebeb; */
 }
 
 .bootstrap-table .btn:focus, .bootstrap-table .btn:hover {

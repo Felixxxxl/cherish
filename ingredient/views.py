@@ -143,6 +143,9 @@ class OwnIngredientDetailView(APIView):
         except OwnIngredientDetail.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
+        if data.get('quantity') == '' or float(data.get('quantity')) <= 0:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
         # Serializes the retrieved detail object with the update data and checks if the serialization is valid
         ser_data = OIDetailSerializer(detail, data=data)
         if ser_data.is_valid():
@@ -168,6 +171,9 @@ class OwnIngredientDetailView(APIView):
         # Retrieves the `name` from the URL parameters
         name = data.get('name')
 
+        if data.get('quantity') == '' or float(data.get('quantity')) <= 0 or name == '':
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
         try:
             # Tries to get an existing ingredient with the extracted name
             ingredient = OwnIngredient.objects.get(name=name)
@@ -187,7 +193,6 @@ class OwnIngredientDetailView(APIView):
         else:
             # Deletes any created ingredient due to validation failure and prints the error message
             ingredient.delete()
-            print(ser_data.error_messages)
             # Returns with Http status 400 cause invalid data input detected
             return Response(status=status.HTTP_400_BAD_REQUEST)
 

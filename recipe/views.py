@@ -226,7 +226,7 @@ class RecipeDetailsListView(APIView):
             # check if its a new row
             if detail.get('detail_id') == 'newRow':
                 # check if quantity and name whether it is empty
-                if detail.get('quantity') == '' or detail.get('name') == '':
+                if detail.get('quantity') == '' or detail.get('name') == '' or float(detail.get('quantity')) <= 0:
                     continue
 
                 # create new ingredient and get existing one
@@ -243,7 +243,7 @@ class RecipeDetailsListView(APIView):
             else:
                 detail_id = detail['detail_id']
                  # if quantity or ingredient is empty delete detail object
-                if detail['quantity'] == '' or detail['quantity'] == 0 or detail['ingredient']['name'] == '':
+                if detail['quantity'] == '' or float(detail.get('quantity')) <= 0 or detail['ingredient']['name'] == '':
                     detail = RecipeDetail.objects.get(detail_id=detail_id).delete()
                     continue
                 
@@ -300,6 +300,8 @@ class RecipeDetailsListView(APIView):
         # Get the details and recipe name from the request data
         details = request.data.get('details')
         recipe_name = request.data.get('recipe_name')
+        if recipe_name == '':
+            return Response(status=status.HTTP_400_BAD_REQUEST)
         # Create a savepoint for the transaction in case of errors
         save_id = transaction.savepoint()
 
@@ -314,7 +316,10 @@ class RecipeDetailsListView(APIView):
         # Loop through each detail in the list of details
         for detail in details:
             # Check if the quantity or ingredient name is empty or the quantity is 0
-            if detail.get('quantity') == '' or detail.get('ingredient').get('name') == '' or detail.get('quantity') == 0:
+            if detail.get('quantity') == '' or detail.get('ingredient').get('name') == '' or float(detail.get('quantity')) <= 0:
+                if len(details) == 1:
+                    transaction.savepoint_rollback(save_id)
+                    return Response(status=status.HTTP_400_BAD_REQUEST)
                 # Skip this detail if it doesn't have a valid quantity and ingredient
                 continue
             # Get the quantity, unit, and ingredient name from the detail

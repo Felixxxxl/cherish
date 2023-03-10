@@ -1,18 +1,10 @@
-<!-- <script src="/static/js/bootstrap.bundle.js"></script> -->
-<link href="/static/bootstrap-table/themes/bootstrap-table/bootstrap-table.css" rel="stylesheet">
-<link rel="stylesheet" href="/static/css/bootstrap-icons.css">
-<script src="/static/bootstrap-table/bootstrap-table.js"></script>
-<script src="/static/bootstrap-table/themes/bootstrap-table/bootstrap-table.js"></script>
-<link href="/static/css/bootstrap.css" rel="stylesheet">
-
+{% include "ex_table_script.html" %}
 {% include "add_ingredient_modal.html" %}
 {% include "edit_ingredient_modal.html" %}
 {% include "del_ingredient_modal.html" %}
 {% include "status_modal.html" %}
 
 <div class="container">
-    
-    
     <div class="row">
         <div class="col mb-1 ">
             <button type="button" class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#AddModal"><i class="bi bi-plus-square"></i> Add Ingredient</button>
@@ -24,8 +16,6 @@
             <table id="IngredientsTable"></table>
         </div>
     </div>
-
-    
 </div>
 
 
@@ -39,7 +29,7 @@
             uniqueId: "ingredient_id",
             detailViewIcon: true,
             cache: false, 
-            classes: "table table-borderless",
+            classes: "table table-borderless table-responsive",
             headerStyle:{classes:"table-dark"},
             rowStyle:{classes:"table-primary"},
             columns: [
@@ -88,7 +78,7 @@
                 url: '/api/oi/getdetailslist/' + row.ingredient_id ,
                 method:'get',
                 uniqueId: "detail_id", 
-                classes: "table table-hover table-borderless",
+                classes: "table table-hover table-borderless table-responsive",
                 headerStyle:{classes:"table-info"},
                 columns: [
                         {
@@ -128,16 +118,12 @@
             })
 
         }
-
+        
         function operateFormatter(value,row,index){
             return [
-            '<button type="button" class="btn primary" data-id="',row.detail_id,'"data-bs-toggle="modal" data-bs-target="#EditModal">','<i class="bi bi-pencil"></i>','</button>',
-            '<button type="button" class="btn primary" data-id="',row.detail_id,'"data-bs-toggle="modal" data-bs-target="#DelModal">','<i class="bi bi-trash3"></i>','</button>'
+            '<div class="d-grid gap-2 col-6 mx-auto"><button type="button" class="btn btn-primary" data-id="',row.detail_id,'"data-bs-toggle="modal" data-bs-target="#EditModal">','<i class="bi bi-pencil"></i>','</button>',
+            '<button type="button" class="btn btn-danger" data-id="',row.detail_id,'"data-bs-toggle="modal" data-bs-target="#DelModal">','<i class="bi bi-trash3"></i>','</button></div>'
             ].join('')
         }
-
-
-
-
     })
 </script>

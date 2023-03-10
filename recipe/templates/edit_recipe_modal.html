@@ -24,16 +24,6 @@
                             </div>
                         </div>
 
-                        <!-- <div class="row">
-                            <div class="col">
-                                <label for="recipe-describe" class="col-form-label"><b>Recipe Describe:</b></label>
-                                <textarea type="text" class="form-control" id="recipe-describe"></textarea>
-                            </div>
-                        </div>
-
-                        <label for="recipe-picture" class="col-form-label"><b>Recipe Picture:</b></label>
-                        <input class="form-control" type="file" id="recipe-picture-file"> -->
-
                         <label for="recipe-ingredients" class="col-form-label"><b>Recipe Details:</b></label>
 
                         <div id="ingredients-input-group">
@@ -51,16 +41,11 @@
                                     <label>Operate</label>
                                 </div>
                             </div>
-
-
-
-
-
                         </div>
 
 
                         <div class="row mt-5">
-                            <button type="button" class="btn btn-outline-primary" id="addBtn">Add Ingredient</button>
+                            <button type="button" class="btn btn-primary" id="addBtn">Add Ingredient</button>
                         </div>
                     </form>
                 </div>
@@ -69,8 +54,8 @@
 
 
             <div class="modal-footer">
-                <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Close</button>
-                <button type="submit" class="btn btn-outline-dark" id="updateForm">Modify</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-primary" id="updateForm">Modify</button>
             </div>
 
         </div>
@@ -129,15 +114,15 @@
             edit_ingredient_col_id = 1
         }
 
-        
+
 
 
         function editModaladdInputs(edit_ingredient_col_id, detail_id = "newRow", modal) {
 
             var detail_element = document.createElement('div')
-            detail_element.className = "row text-center"
+            detail_element.className = "row text-center my-1"
             detail_element.id = `ingredient-input-${edit_ingredient_col_id}`
-            detail_element.innerHTML = `<div class="col"><input type="text" id="detail-input-${edit_ingredient_col_id}" value=${detail_id} hidden><input type="text" class="form-control" id="ingredient-name-${edit_ingredient_col_id}"></div><div class="col"><input type="text" class="form-control" id="ingredient-quantity-${edit_ingredient_col_id}"></div><div class="col"><select  class="form-select" id="ingredient-unit-${edit_ingredient_col_id}"><option selected value="g">g</option><option value="kg">kg</option><option value="oz">oz</option><option value="lbs">lbs</option></select></div><div class="col"><button type="button" class="btn" id="ingredient-btn-${edit_ingredient_col_id}" onClick="deldetailBtn(this)"><i class="bi bi-x-circle"></i></button></div>`
+            detail_element.innerHTML = `<div class="col"><input type="text" id="detail-input-${edit_ingredient_col_id}" value=${detail_id} hidden><input type="text" class="form-control" id="ingredient-name-${edit_ingredient_col_id}"></div><div class="col"><input type="number" class="form-control" id="ingredient-quantity-${edit_ingredient_col_id}"></div><div class="col"><select  class="form-select" id="ingredient-unit-${edit_ingredient_col_id}"><option selected value="g">g</option><option value="kg">kg</option><option value="oz">oz</option><option value="lbs">lbs</option></select></div><div class="col"><button type="button" class="btn btn-danger" id="ingredient-btn-${edit_ingredient_col_id}" onClick="deldetailBtn(this)"><i class="bi bi-x-circle"></i></button></div>`
             modal.querySelector('#ingredients-input-group').appendChild(detail_element)
         }
 
@@ -192,7 +177,13 @@
                     $("#success-modal").modal("show")
                     setTimeout(function () {
                         location.reload()
-                    }, 300)
+                    }, 500)
+                },
+                error: function (response) {
+                    $("#error-modal").modal("show")
+                    setTimeout(function () {
+                        location.reload()
+                    }, 1000);
                 }
             });
 
@@ -202,12 +193,12 @@
     })
 
     var deldetailBtn = function (obj) {
-            detail_id_str = obj.getAttribute('id')
-            detail_id_list = detail_id_str.split('-')
-            detail_id = detail_id_list[detail_id_list.length - 1]
-            input_id = '#ingredient-input-' + detail_id
-            EditModal.querySelector(input_id).remove()
-        }
+        detail_id_str = obj.getAttribute('id')
+        detail_id_list = detail_id_str.split('-')
+        detail_id = detail_id_list[detail_id_list.length - 1]
+        input_id = '#ingredient-input-' + detail_id
+        EditModal.querySelector(input_id).remove()
+    }
 
 
 
