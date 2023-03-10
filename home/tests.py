@@ -7,7 +7,7 @@ from ingredient.models import OwnIngredient,OwnIngredientDetail
 from datetime import date,timedelta
 from rest_framework import status
 
-class IngredientStatusLogTestCase(TestCase):
+class ModelsTestCase(TestCase):
     def setUp(self):
         IngredientStatusLog.objects.create(
             ingredient_name='Beef',
@@ -24,7 +24,7 @@ class IngredientStatusLogTestCase(TestCase):
         self.assertEqual(log.date, date.today())
 
 
-class IngredientStatusLogSerializerTestCase(TestCase):
+class SerializersTestCase(TestCase):
     def setUp(self):
         self.log = IngredientStatusLog.objects.create(
             ingredient_name='Salt',
@@ -54,6 +54,7 @@ class TestLogPage(TestCase):
         response = client.get('/log/')
         self.assertEqual(response.status_code, 200)
 
+### API UNITTEST ###
 class WastingLogViewTestCase(TestCase):
     
     def setUp(self):

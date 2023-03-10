@@ -53,7 +53,7 @@ class ModelsTestCase(TestCase):
         self.assertEqual(details[0].quantity, 1)
 
 
-class SerializersTestCases(TestCase):
+class SerializersTestCase(TestCase):
 
     def setUp(self):
         self.own_ingredient = OwnIngredient.objects.create(name='Green pepper')
@@ -107,7 +107,7 @@ class TestIngredientsPage(TestCase):
         response = client.get('/ingredient/')
         self.assertEqual(response.status_code, 200)
 
-
+### API UNITTEST ###
 class TestOwnIngredientCategoryView(TestCase):
 
     def setUp(self):

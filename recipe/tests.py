@@ -31,7 +31,7 @@ class ModelsTestCase(TestCase):
         self.assertEqual(pancake_recipe_detail.quantity, 1.5)
         self.assertEqual(pancake_recipe_detail.unit, 'kg')
 
-class RecipeSerializerTest(TestCase):
+class SerializersTestCase(TestCase):
     
     def setUp(self):
         self.recipe = Recipe.objects.create(recipe_name='Pancakes')
@@ -54,6 +54,7 @@ class TestRecipePage(TestCase):
         response = client.get('/recipe/')
         self.assertEqual(response.status_code, 200)
 
+### API UNITTEST ###
 class RecipesListViewTestCase(TestCase):
 
     def setUp(self):
