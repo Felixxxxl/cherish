@@ -1,4 +1,5 @@
 # cherish
+##### A Home Food Management System
 # required library
 ##### pip install django
 ##### pip install djangorestframewrk
