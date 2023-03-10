@@ -78,8 +78,7 @@ class RecommendRecipesView(APIView):
         ).annotate(
             # Use the quality of the ingredients and the expiration date of the ingredients to score the ingredients
             # Formula: socre = exp(quantity * quality coefficient / (remaining days * time coefficient))
-            score=Exp(F('normalized_quantity') * quantity_k / \
-                      F('remaining_date') / expiry_date_k)
+            score=Exp(F('normalized_quantity') * quantity_k / F('remaining_date') / expiry_date_k)
         )
 
         # Statistics the total quality of the same type of ingredients
