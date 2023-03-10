@@ -1,9 +1,4 @@
-<!-- <script src="/static/js/bootstrap.bundle.js"></script> -->
-<link href="/static/bootstrap-table/themes/bootstrap-table/bootstrap-table.css" rel="stylesheet">
-<link rel="stylesheet" href="/static/css/bootstrap-icons.css">
-<script src="/static/bootstrap-table/bootstrap-table.js"></script>
-<script src="/static/bootstrap-table/themes/bootstrap-table/bootstrap-table.js"></script>
-<link href="/static/css/bootstrap.css" rel="stylesheet">
+{% include "ex_table_script.html" %}
 {% include "recipe_modal.html" %}
 <div class="container">
     
@@ -28,7 +23,7 @@
             method : 'get',
             uniqueId : 'recipe_id',
             cache : false,
-            classes : 'table table-borderless',
+            classes : 'table table-borderless table-responsive',
             headerStyle : {classes : ' table-dark '},
             columns : [
                 {
@@ -94,7 +89,7 @@
         function ingredientTable(data,cur_table){
             $(cur_table).bootstrapTable({
                 data:data,
-                classes: 'table',
+                classes: 'table table-responsive',
                 headerStyle : {classes:'table-info'},
                 columns:[
                     {
