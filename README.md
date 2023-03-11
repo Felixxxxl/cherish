@@ -1,9 +1,10 @@
 # cherish
+##### A Home Food Management System
 # required library
-pip install django
-pip install djangorestframewrk
-pip install coreapi
+##### pip install django
+##### pip install djangorestframewrk
+##### pip install coreapi
 # run server
-python manager.py runserver 8008
+##### python manager.py runserver 8008
 # test all app
-python manager.py test
+##### python manager.py test
